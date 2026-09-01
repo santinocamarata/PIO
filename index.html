@@ -760,8 +760,9 @@ select.control { cursor: pointer; }
    contraseña sí, exacta.
    ============================================================ */
 const USUARIOS = [
-  { usuario: 'ingreso', clave: 'UADE2026', rol: 'operador', nombre: 'Mesa de entrada' },
-  { usuario: 'Romero',  clave: 'lordalan', rol: 'admin',    nombre: 'Romero' }
+  { usuario: 'ingreso',   clave: 'UADE2026', rol: 'operador', nombre: 'Mesa de entrada' },
+  { usuario: 'aromero',   clave: 'lordalan', rol: 'admin',    nombre: 'Romero' },
+  { usuario: 'scamarata', clave: 'lordalan', rol: 'admin',    nombre: 'Camarata' }
 ];
 
 /** Qué puede hacer cada rol. El operador solo carga y consulta fichas. */
@@ -1867,9 +1868,9 @@ if (location.search.includes('test')) {
   iguales(autenticar('INGRESO', 'UADE2026', USUARIOS).ok, true, 'usuario sin distinguir mayúsculas');
   iguales(autenticar('  ingreso  ', 'UADE2026', USUARIOS).ok, true, 'usuario con espacios');
   iguales(autenticar('ingreso', 'uade2026', USUARIOS).ok, false, 'contraseña distingue mayúsculas');
-  iguales(autenticar('Romero', 'lordalan', USUARIOS).sesion.rol, 'admin', 'rol del admin');
-  iguales(autenticar('romero', 'lordalan', USUARIOS).ok, true, 'admin sin distinguir mayúsculas');
-  iguales(autenticar('romero', 'LORDALAN', USUARIOS).ok, false, 'contraseña del admin exacta');
+  iguales(autenticar('aromero', 'lordalan', USUARIOS).sesion.rol, 'admin', 'rol del admin');
+  iguales(autenticar('AROMERO', 'lordalan', USUARIOS).ok, true, 'admin sin distinguir mayúsculas');
+  iguales(autenticar('aromero', 'LORDALAN', USUARIOS).ok, false, 'contraseña del admin exacta');
   iguales(autenticar('otro', 'x', USUARIOS).ok, false, 'usuario inexistente');
   iguales(autenticar('', '', USUARIOS).mensaje, 'Completá usuario y contraseña.', 'campos vacíos');
   iguales(autenticar('ingreso', 'mal', USUARIOS).mensaje,
