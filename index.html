@@ -1,0 +1,1984 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fichas de excepción · Examen de Ingreso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=JetBrains+Mono:wght@500;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS
+   Fallback hex primero, OKLCH después: los navegadores viejos de
+   mostrador se quedan con el hex, el resto usa espacio perceptual.
+   ============================================================ */
+:root {
+  --fondo:         #f2f3f5;  --fondo:         oklch(0.958 0.003 250);
+  --superficie:    #ffffff;  --superficie:    oklch(1 0 0);
+  --superficie-2:  #f8f9fa;  --superficie-2:  oklch(0.978 0.002 250);
+  --tinta:         #171b22;  --tinta:         oklch(0.20 0.012 255);
+  --tinta-suave:   #5f6672;  --tinta-suave:   oklch(0.475 0.012 255);
+  --tinta-tenue:   #8d939d;  --tinta-tenue:   oklch(0.635 0.010 255);
+  --institucional: #1f3d73;  --institucional: oklch(0.345 0.095 258);
+  --institucional-2:#2d5296; --institucional-2:oklch(0.425 0.110 258);
+  --valido:        #16704a;  --valido:        oklch(0.485 0.110 158);
+  --valido-fondo:  #e9f4ee;  --valido-fondo:  oklch(0.955 0.022 158);
+  --error:         #b3352a;  --error:         oklch(0.485 0.170 27);
+  --error-fondo:   #fbeeec;  --error-fondo:   oklch(0.960 0.018 27);
+  --espera:        #8a5a08;  --espera:        oklch(0.505 0.105 75);
+  --borde:         #d9dce1;  --borde:         oklch(0.878 0.005 255);
+  --regla:         #e6e8ec;  --regla:         oklch(0.925 0.004 255);
+  --campo:         #f6f7f8;  --campo:         oklch(0.972 0.002 255);
+
+  --serif: 'EB Garamond', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --sans:  'Source Sans 3', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --mono:  'JetBrains Mono', 'Cascadia Mono', 'SF Mono', Consolas, monospace;
+
+  --sp-1: 4px; --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+/* Cualquier regla de clase con display propio (.acceso usa grid) le gana al
+   display:none que el navegador aplica a [hidden]. Sin este !important, ocultar
+   un elemento con .hidden = true no surte efecto. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--tinta);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   INGRESO
+   ============================================================ */
+.acceso {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+.acceso-banda { height: 6px; background: var(--institucional); }
+.acceso-centro {
+  display: grid;
+  place-items: center;
+  padding: var(--sp-5);
+}
+.acceso-panel {
+  width: min(420px, 100%);
+  border: 1px solid var(--borde);
+  background: var(--superficie);
+}
+.acceso-cabecera {
+  padding: var(--sp-6) var(--sp-6) var(--sp-5);
+  border-bottom: 1px solid var(--regla);
+}
+.acceso-sigla {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+.acceso-depto {
+  margin: var(--sp-2) 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+.acceso-cuerpo { padding: var(--sp-5) var(--sp-6) var(--sp-6); }
+.acceso-error {
+  margin: 0 0 var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
+  border-left: 3px solid var(--error);
+  background: var(--error-fondo);
+  color: var(--error);
+  font-size: 14px;
+  font-weight: 600;
+}
+.acceso-pie {
+  margin: var(--sp-5) 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--tinta-tenue);
+}
+
+/* ============================================================
+   BARRA INSTITUCIONAL
+   ============================================================ */
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3) var(--sp-5);
+  padding: var(--sp-3) var(--sp-5);
+  background: var(--institucional);
+  color: #fff;
+}
+.barra-identidad { display: flex; align-items: baseline; gap: var(--sp-3); min-width: 0; }
+.barra-sigla { font-family: var(--serif); font-size: 19px; font-weight: 600; white-space: nowrap; }
+.barra-depto {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: rgba(255, 255, 255, 0.72); white-space: nowrap;
+}
+.barra-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); margin-left: auto; }
+.barra-dato { font-size: 12.5px; color: rgba(255, 255, 255, 0.78); white-space: nowrap; }
+.barra-dato b {
+  font-family: var(--mono); font-variant-numeric: tabular-nums;
+  font-weight: 700; color: #fff;
+}
+.barra-sesion {
+  display: flex; align-items: center; gap: var(--sp-2);
+  padding-left: var(--sp-4);
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 12.5px; color: rgba(255, 255, 255, 0.85); white-space: nowrap;
+}
+.insignia {
+  padding: 2px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.09em; text-transform: uppercase;
+}
+
+/* ============================================================
+   BOTONES
+   ============================================================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
+  min-height: 44px; padding: 0 var(--sp-4);
+  border: 1px solid var(--borde); border-radius: 2px;
+  background: var(--superficie); color: var(--tinta);
+  font-family: var(--sans); font-size: 14.5px; font-weight: 600;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+.btn:hover:not(:disabled) { background: var(--superficie-2); border-color: var(--tinta-tenue); }
+.btn:focus-visible { outline: 2px solid var(--institucional-2); outline-offset: 2px; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-principal { border-color: var(--institucional-2); background: var(--institucional-2); color: #fff; }
+.btn-principal:hover:not(:disabled) { background: #24447d; border-color: #24447d; }
+
+.btn-ancho { width: 100%; }
+
+.btn-sobre-barra { border-color: rgba(255, 255, 255, 0.34); background: transparent; color: #fff; }
+.btn-sobre-barra:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.6); }
+.btn-sobre-barra:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+.btn-fila { min-height: 32px; padding: 0 var(--sp-3); font-size: 13px; }
+.btn-riesgo { color: var(--error); border-color: var(--borde); }
+.btn-riesgo:hover:not(:disabled) { background: var(--error-fondo); border-color: var(--error); }
+
+/* ============================================================
+   ÁREA DE TRABAJO
+   ============================================================ */
+.area { max-width: 1280px; margin: 0 auto; padding: var(--sp-5); }
+.area-cabecera {
+  display: flex; flex-wrap: wrap; align-items: flex-end;
+  gap: var(--sp-3) var(--sp-4); margin-bottom: var(--sp-4);
+}
+.area-titulo { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+.area-conteo { font-size: 13px; color: var(--tinta-suave); font-variant-numeric: tabular-nums; }
+.area-herramientas { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-left: auto; }
+
+.buscador {
+  min-height: 44px; min-width: 240px; padding: 0 var(--sp-3);
+  border: 1px solid var(--borde); border-radius: 2px;
+  background: var(--superficie); color: var(--tinta);
+  font-family: var(--sans); font-size: 14.5px;
+}
+.buscador:focus-visible { outline: 2px solid var(--institucional-2); outline-offset: -1px; border-color: var(--institucional-2); }
+.buscador::placeholder { color: var(--tinta-tenue); }
+
+/* ============================================================
+   TABLA DE FICHAS
+   ============================================================ */
+.marco { border: 1px solid var(--borde); background: var(--superficie); }
+.desplazador { overflow-x: auto; }
+
+.tabla { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.tabla thead th {
+  position: sticky; top: 0;
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--borde);
+  background: var(--superficie-2); color: var(--tinta-suave);
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.09em;
+  text-transform: uppercase; text-align: left; white-space: nowrap;
+}
+.tabla tbody td { padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--regla); vertical-align: middle; }
+.tabla tbody tr:last-child td { border-bottom: none; }
+.tabla tbody tr:hover td { background: var(--superficie-2); }
+
+.celda-legajo {
+  font-family: var(--mono); font-size: 14px; font-weight: 700;
+  font-variant-numeric: tabular-nums; letter-spacing: 0.03em; white-space: nowrap;
+}
+.celda-alumno { font-weight: 600; min-width: 190px; }
+.celda-motivo { color: var(--tinta-suave); min-width: 230px; }
+.celda-fecha { font-family: var(--mono); font-size: 13.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.celda-acciones { text-align: right; white-space: nowrap; }
+.celda-folio { font-family: var(--mono); font-size: 12px; color: var(--tinta-tenue); white-space: nowrap; }
+
+.enlace-pdf {
+  display: inline-block; max-width: 210px; min-height: 32px;
+  padding: 6px var(--sp-2);
+  border: 1px solid var(--borde); border-radius: 2px;
+  background: var(--superficie); color: var(--institucional-2);
+  font-family: var(--sans); font-size: 13px; font-weight: 600; text-align: left;
+  /* El nombre se recorta antes que partirse en dos líneas; queda entero en el title. */
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  cursor: pointer; transition: background-color 140ms ease;
+}
+.enlace-pdf:hover { background: var(--superficie-2); }
+.enlace-pdf:focus-visible { outline: 2px solid var(--institucional-2); outline-offset: 2px; }
+.sin-pdf { color: var(--tinta-tenue); font-size: 13px; }
+
+@keyframes destacar { from { background: var(--valido-fondo); } to { background: transparent; } }
+.tabla tbody tr.nueva td { animation: destacar 1800ms ease-out; }
+
+.vacio { padding: 56px var(--sp-5); text-align: center; }
+.vacio-titulo { margin: 0 0 var(--sp-2); font-size: 17px; font-weight: 600; }
+.vacio-texto { margin: 0 auto var(--sp-5); max-width: 46ch; color: var(--tinta-suave); }
+
+/* ============================================================
+   DIÁLOGOS
+   <dialog> nativo: backdrop, foco atrapado y cierre con Esc sin
+   una línea de JS de accesibilidad propia.
+   ============================================================ */
+dialog {
+  width: min(680px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  padding: 0;
+  border: 1px solid var(--borde); border-radius: 2px;
+  background: var(--superficie); color: var(--tinta);
+}
+dialog.ancho { width: min(880px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgba(15, 21, 33, 0.55); }
+
+/* Solo el cuerpo scrollea: el pie con la acción principal queda siempre
+   visible. El display va en [open] para no romper el ocultamiento por
+   defecto del diálogo cerrado. */
+dialog[open] { display: flex; flex-direction: column; }
+dialog > form { display: flex; flex-direction: column; min-height: 0; }
+.dlg-cabecera, .dlg-pie { flex: 0 0 auto; }
+.dlg-cuerpo { flex: 1 1 auto; min-height: 0; }
+
+.dlg-cabecera {
+  display: flex; align-items: flex-start; gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--borde);
+  border-top: 3px solid var(--institucional);
+}
+.dlg-titulo { margin: 0; font-size: 18px; font-weight: 700; }
+.dlg-bajada { margin: var(--sp-1) 0 0; font-size: 14px; color: var(--tinta-suave); }
+.dlg-cerrar {
+  margin-left: auto; width: 36px; height: 36px; flex: 0 0 36px;
+  display: grid; place-items: center;
+  border: 1px solid transparent; border-radius: 2px;
+  background: none; color: var(--tinta-suave);
+  font-size: 22px; line-height: 1; cursor: pointer;
+}
+.dlg-cerrar:hover { background: var(--superficie-2); color: var(--tinta); }
+.dlg-cerrar:focus-visible { outline: 2px solid var(--institucional-2); outline-offset: 2px; }
+
+.dlg-cuerpo { padding: var(--sp-5); overflow-y: auto; }
+.dlg-pie {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  border-top: 1px solid var(--borde); background: var(--superficie-2);
+}
+.dlg-nota { font-size: 13.5px; color: var(--tinta-suave); }
+.dlg-nota[data-estado="error"] { color: var(--error); font-weight: 600; }
+.dlg-nota[data-estado="ok"] { color: var(--valido); font-weight: 600; }
+
+/* ============================================================
+   CAMPOS
+   ============================================================ */
+.campo { margin-bottom: var(--sp-5); }
+.campo:last-child { margin-bottom: 0; }
+.rotulo {
+  display: block; margin-bottom: var(--sp-2);
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--tinta-suave);
+}
+.ayuda { margin: var(--sp-2) 0 0; font-size: 13.5px; color: var(--tinta-suave); }
+
+.control {
+  width: 100%; min-height: 46px; padding: 10px var(--sp-3);
+  border: 1px solid var(--borde); border-radius: 2px;
+  background: var(--campo); color: var(--tinta);
+  font-family: var(--sans); font-size: 15px;
+}
+.control:hover:not(:disabled) { border-color: var(--tinta-tenue); }
+.control:focus-visible {
+  outline: 2px solid var(--institucional-2); outline-offset: -1px;
+  border-color: var(--institucional-2); background: var(--superficie);
+}
+select.control { cursor: pointer; }
+
+/* Campo de legajo: el único momento con color fuerte del sistema */
+.legajo-bloque { display: flex; align-items: stretch; }
+.legajo-sello { flex: 0 0 5px; background: var(--borde); transition: background-color 160ms ease; }
+.legajo-entrada {
+  flex: 1; min-width: 0; min-height: 58px; padding: 8px var(--sp-4);
+  border: 1px solid var(--borde); border-left: none; border-radius: 0;
+  background: var(--campo); color: var(--tinta);
+  font-family: var(--mono); font-size: 27px; font-weight: 700;
+  font-variant-numeric: tabular-nums; letter-spacing: 0.13em;
+}
+.legajo-entrada::placeholder { color: var(--tinta-tenue); font-weight: 500; }
+.legajo-entrada:hover { border-color: var(--tinta-tenue); }
+.legajo-entrada:focus-visible {
+  outline: 2px solid var(--institucional-2); outline-offset: -1px; background: var(--superficie);
+}
+.legajo-bloque[data-estado="valido"]      .legajo-sello { background: var(--valido); }
+.legajo-bloque[data-estado="inexistente"] .legajo-sello,
+.legajo-bloque[data-estado="excedido"]    .legajo-sello { background: var(--error); }
+.legajo-bloque[data-estado="incompleto"]  .legajo-sello { background: var(--espera); }
+
+.resolucion {
+  margin-top: var(--sp-3); padding: var(--sp-3) var(--sp-4);
+  border-left: 3px solid var(--borde); background: var(--campo);
+  font-size: 14.5px; color: var(--tinta-suave);
+}
+.resolucion[data-estado="valido"] { border-left-color: var(--valido); background: var(--valido-fondo); color: var(--tinta); }
+.resolucion[data-estado="inexistente"],
+.resolucion[data-estado="excedido"] { border-left-color: var(--error); background: var(--error-fondo); color: var(--error); }
+.resolucion[data-estado="incompleto"] { border-left-color: var(--espera); }
+.resolucion-marca {
+  display: block; margin-bottom: 1px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--valido);
+}
+.resolucion-nombre { display: block; font-size: 18px; font-weight: 700; line-height: 1.3; color: var(--tinta); }
+
+.archivo-nativo {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.archivo-fila { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
+.archivo-nombre { min-width: 0; font-family: var(--mono); font-size: 13px; color: var(--tinta-suave); overflow-wrap: anywhere; }
+.archivo-quitar {
+  border: none; background: none; padding: var(--sp-2);
+  color: var(--error); font-family: var(--sans); font-size: 13.5px; font-weight: 600;
+  text-decoration: underline; cursor: pointer;
+}
+.archivo-quitar:focus-visible { outline: 2px solid var(--institucional-2); outline-offset: 2px; }
+
+/* ============================================================
+   CONFIGURACIÓN (admin)
+   ============================================================ */
+.seccion { margin-bottom: var(--sp-6); }
+.seccion:last-child { margin-bottom: 0; }
+.seccion-titulo {
+  margin: 0 0 var(--sp-3); padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--borde);
+  font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--tinta-suave);
+}
+.alta { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-4); }
+.alta .control { flex: 1; min-width: 190px; }
+.alta .btn { flex: 0 0 auto; }
+
+.lista { list-style: none; margin: 0; padding: 0; border: 1px solid var(--regla); }
+.lista li {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--regla);
+}
+.lista li:last-child { border-bottom: none; }
+.lista li[data-activo="false"] { background: var(--superficie-2); }
+.lista li[data-activo="false"] .item-texto { color: var(--tinta-tenue); text-decoration: line-through; }
+.item-texto { flex: 1; min-width: 160px; font-size: 14.5px; overflow-wrap: anywhere; }
+.item-texto.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; }
+.item-vencida { margin-left: var(--sp-2); font-size: 12px; font-weight: 600; color: var(--espera); }
+.conmutador { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--tinta-suave); cursor: pointer; }
+.conmutador input { width: 18px; height: 18px; accent-color: var(--institucional-2); cursor: pointer; }
+.lista-vacia { padding: var(--sp-4); color: var(--tinta-tenue); font-size: 14px; text-align: center; }
+
+.datos { margin: 0; font-size: 14.5px; }
+.datos > div {
+  display: grid; grid-template-columns: 110px minmax(0, 1fr);
+  gap: var(--sp-3); padding: var(--sp-2) 0;
+  border-bottom: 1px dotted var(--regla);
+}
+.datos > div:last-child { border-bottom: none; }
+.datos dt { color: var(--tinta-suave); font-size: 13px; }
+.datos dd { margin: 0; overflow-wrap: anywhere; }
+.datos dd.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; }
+
+.aviso {
+  margin: var(--sp-5) 0 0; padding: var(--sp-3) var(--sp-4);
+  border-left: 3px solid var(--espera); background: var(--campo);
+  font-size: 13.5px; line-height: 1.5; color: var(--tinta-suave);
+}
+
+.sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 640px) {
+  .area { padding: var(--sp-3); }
+  .area-herramientas { margin-left: 0; width: 100%; }
+  .buscador { flex: 1; min-width: 0; }
+  .barra-acciones { margin-left: 0; width: 100%; }
+  .barra-sesion { padding-left: 0; border-left: none; }
+  .legajo-entrada { font-size: 23px; }
+}
+
+/* ============================================================
+   COMPROBANTE IMPRESO
+   ============================================================ */
+.comprobante { display: none; }
+
+@media print {
+  .barra, .area, .acceso, dialog { display: none !important; }
+  body { background: #fff; font-size: 12pt; }
+  .comprobante { display: block; }
+  .cp-encabezado {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding-bottom: 8pt; border-bottom: 2pt solid #000;
+  }
+  .cp-institucion { font-family: var(--serif); font-size: 17pt; font-weight: 600; margin: 0; }
+  .cp-depto { font-size: 9pt; letter-spacing: 0.08em; text-transform: uppercase; margin: 2pt 0 0; }
+  .cp-folio { font-family: var(--mono); font-size: 11pt; font-weight: 700; text-align: right; }
+  .cp-titulo {
+    margin: 16pt 0 12pt; font-family: var(--serif); font-size: 20pt;
+    font-weight: 600; text-align: center; letter-spacing: 0.02em;
+  }
+  .cp-datos { width: 100%; border-collapse: collapse; }
+  .cp-datos th, .cp-datos td { padding: 7pt 4pt; border-bottom: 0.5pt solid #666; text-align: left; vertical-align: top; }
+  .cp-datos th { width: 32%; font-size: 8.5pt; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
+  .cp-datos td { font-size: 11pt; }
+  .cp-datos td.mono { font-family: var(--mono); font-weight: 700; letter-spacing: 0.06em; }
+  .cp-firmas { display: flex; gap: 36pt; margin-top: 52pt; }
+  .cp-firma { flex: 1; border-top: 0.5pt solid #000; padding-top: 5pt; font-size: 9pt; text-align: center; }
+  .cp-legal { margin-top: 22pt; font-size: 8pt; line-height: 1.4; color: #333; }
+  @page { margin: 16mm; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     PANTALLA DE INGRESO
+     ============================================================ -->
+<div class="acceso" id="pantalla-acceso">
+  <div class="acceso-banda"></div>
+  <div class="acceso-centro">
+    <div class="acceso-panel">
+      <div class="acceso-cabecera">
+        <h1 class="acceso-sigla">Examen de Ingreso</h1>
+        <p class="acceso-depto">Fichas de excepción</p>
+      </div>
+      <div class="acceso-cuerpo">
+        <p class="acceso-error" id="acceso-error" hidden role="alert"></p>
+        <form id="form-acceso" novalidate>
+          <div class="campo">
+            <label class="rotulo" for="usuario">Usuario</label>
+            <input class="control" id="usuario" name="usuario" type="text"
+                   autocomplete="username" autocapitalize="none" spellcheck="false" required>
+          </div>
+          <div class="campo">
+            <label class="rotulo" for="clave">Contraseña</label>
+            <input class="control" id="clave" name="clave" type="password"
+                   autocomplete="current-password" required>
+          </div>
+          <button class="btn btn-principal btn-ancho" type="submit">Ingresar</button>
+        </form>
+        <p class="acceso-pie">
+          La sesión se cierra al cerrar el navegador. Si compartís el equipo con
+          otra persona, usá <b>Salir</b> cuando termines.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     APLICACIÓN
+     ============================================================ -->
+<div id="pantalla-app" hidden>
+
+  <header class="barra">
+    <div class="barra-identidad">
+      <span class="barra-sigla">Examen de Ingreso</span>
+      <span class="barra-depto">Fichas de excepción</span>
+    </div>
+    <div class="barra-acciones">
+      <span class="barra-dato">Padrón · <b id="barra-cantidad">—</b> alumnos</span>
+      <button class="btn btn-sobre-barra" id="abrir-config" type="button" hidden>Configuración</button>
+      <button class="btn btn-principal" id="abrir-ficha" type="button">Nueva ficha</button>
+      <span class="barra-sesion">
+        <span class="insignia" id="sesion-rol">—</span>
+        <span id="sesion-nombre">—</span>
+        <button class="btn btn-sobre-barra btn-fila" id="salir" type="button">Salir</button>
+      </span>
+    </div>
+  </header>
+
+  <main class="area">
+    <div class="area-cabecera">
+      <div>
+        <h1 class="area-titulo">Fichas emitidas</h1>
+        <span class="area-conteo" id="conteo">Sin fichas cargadas</span>
+      </div>
+      <div class="area-herramientas">
+        <label class="sr" for="buscar">Buscar ficha</label>
+        <input class="buscador" id="buscar" type="search" placeholder="Buscar por legajo, alumno o motivo" autocomplete="off">
+        <button class="btn" id="exportar" type="button">Exportar CSV</button>
+      </div>
+    </div>
+
+    <div class="marco">
+      <div class="desplazador">
+        <table class="tabla" id="tabla" hidden>
+          <thead>
+            <tr>
+              <th scope="col">Legajo</th>
+              <th scope="col">Alumno</th>
+              <th scope="col">Motivo</th>
+              <th scope="col">Recuperatorio</th>
+              <th scope="col">Documentación</th>
+              <th scope="col">Ficha N.º</th>
+              <th scope="col"><span class="sr">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody id="cuerpo-tabla"></tbody>
+        </table>
+      </div>
+
+      <div class="vacio" id="vacio">
+        <p class="vacio-titulo" id="vacio-titulo">Todavía no hay fichas cargadas</p>
+        <p class="vacio-texto" id="vacio-texto">
+          Cada ficha registra a un alumno inscripto que no podrá asistir a la fecha
+          de curso asignada y la fecha de recuperatorio que se le otorga.
+        </p>
+        <button class="btn btn-principal" id="vacio-accion" type="button">Crear la primera ficha</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ============================================================
+     DIÁLOGO · NUEVA FICHA
+     ============================================================ -->
+<dialog id="dlg-ficha" aria-labelledby="dlg-ficha-titulo">
+  <form id="form-ficha" novalidate>
+    <div class="dlg-cabecera">
+      <div>
+        <h2 class="dlg-titulo" id="dlg-ficha-titulo">Nueva ficha de excepción</h2>
+        <p class="dlg-bajada">El legajo se valida contra el padrón de alumnos a ingresar.</p>
+      </div>
+      <button class="dlg-cerrar" id="cerrar-ficha" type="button" aria-label="Cerrar sin guardar">&times;</button>
+    </div>
+
+    <div class="dlg-cuerpo">
+      <div class="campo">
+        <label class="rotulo" for="legajo">Legajo del alumno</label>
+        <div class="legajo-bloque" id="legajo-bloque" data-estado="vacio">
+          <span class="legajo-sello" aria-hidden="true"></span>
+          <input class="legajo-entrada" id="legajo" type="text" inputmode="numeric"
+                 autocomplete="off" maxlength="9" placeholder="0000000" aria-describedby="resolucion">
+        </div>
+        <div class="resolucion" id="resolucion" role="status" aria-live="polite" data-estado="vacio">
+          Ingresá los 7 dígitos del legajo para validar.
+        </div>
+      </div>
+
+      <div class="campo">
+        <label class="rotulo" for="motivo">Motivo de la excepción</label>
+        <select class="control" id="motivo"><option value="">Seleccioná un motivo</option></select>
+      </div>
+
+      <div class="campo">
+        <label class="rotulo" for="fecha">Fecha de recuperatorio asignada</label>
+        <select class="control" id="fecha"><option value="">Seleccioná una fecha</option></select>
+      </div>
+
+      <div class="campo">
+        <span class="rotulo" id="rotulo-adjunto">Documentación respaldatoria</span>
+        <div class="archivo-fila">
+          <input class="archivo-nativo" id="adjunto" type="file" accept="application/pdf,.pdf"
+                 aria-labelledby="rotulo-adjunto" aria-describedby="ayuda-adjunto">
+          <label class="btn" for="adjunto">Elegir archivo PDF</label>
+          <span class="archivo-nombre" id="adjunto-nombre">Ningún archivo seleccionado</span>
+          <button class="archivo-quitar" id="adjunto-quitar" type="button" hidden>Quitar</button>
+        </div>
+        <p class="ayuda" id="ayuda-adjunto">Solo PDF, hasta <span id="adjunto-max">10</span> MB. Opcional según el motivo.</p>
+      </div>
+    </div>
+
+    <div class="dlg-pie">
+      <button class="btn btn-principal" id="guardar" type="submit">Guardar ficha</button>
+      <button class="btn" id="cancelar" type="button">Cancelar</button>
+      <span class="dlg-nota" id="nota-ficha" role="status" aria-live="polite"></span>
+    </div>
+  </form>
+</dialog>
+
+<!-- ============================================================
+     DIÁLOGO · CONFIGURACIÓN (solo admin)
+     ============================================================ -->
+<dialog class="ancho" id="dlg-config" aria-labelledby="dlg-config-titulo">
+  <div class="dlg-cabecera">
+    <div>
+      <h2 class="dlg-titulo" id="dlg-config-titulo">Configuración</h2>
+      <p class="dlg-bajada">Motivos, fechas de recuperatorio y padrón de alumnos.</p>
+    </div>
+    <button class="dlg-cerrar" id="cerrar-config" type="button" aria-label="Cerrar">&times;</button>
+  </div>
+
+  <div class="dlg-cuerpo">
+    <section class="seccion">
+      <h3 class="seccion-titulo">Motivos de excepción</h3>
+      <form class="alta" id="alta-motivo">
+        <label class="sr" for="motivo-nuevo">Nuevo motivo</label>
+        <input class="control" id="motivo-nuevo" type="text" maxlength="120"
+               placeholder="Escribí un motivo nuevo" autocomplete="off">
+        <button class="btn btn-principal" type="submit">Agregar</button>
+      </form>
+      <ul class="lista" id="lista-motivos"></ul>
+      <p class="dlg-nota" id="nota-motivos" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="seccion">
+      <h3 class="seccion-titulo">Fechas de recuperatorio</h3>
+      <form class="alta" id="alta-fecha">
+        <label class="sr" for="fecha-nueva">Nueva fecha</label>
+        <input class="control" id="fecha-nueva" type="date">
+        <button class="btn btn-principal" type="submit">Agregar</button>
+      </form>
+      <ul class="lista" id="lista-fechas"></ul>
+      <p class="dlg-nota" id="nota-fechas" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="seccion">
+      <h3 class="seccion-titulo">Padrón de alumnos</h3>
+      <dl class="datos">
+        <div><dt>Registros</dt><dd class="mono" id="p-cantidad">—</dd></div>
+        <div><dt>Origen</dt><dd id="p-origen">—</dd></div>
+        <div><dt>Generado</dt><dd id="p-generado">—</dd></div>
+      </dl>
+      <div class="archivo-fila" style="margin-top:var(--sp-4)">
+        <input class="archivo-nativo" id="padron-archivo" type="file" accept=".xlsx,.xls,.csv" aria-label="Archivo de padrón">
+        <label class="btn btn-principal" for="padron-archivo">Actualizar padrón</label>
+        <span class="dlg-nota" id="nota-padron" role="status" aria-live="polite"></span>
+      </div>
+      <p class="ayuda">
+        Acepta el mismo Excel que exporta el sistema académico, con columnas
+        <b>legajo</b> y <b>alumno</b>.
+      </p>
+    </section>
+
+    <p class="aviso">
+      La configuración y las fichas se guardan en la base de datos compartida.
+      Los cambios son visibles en todos los equipos.
+    </p>
+  </div>
+
+  <div class="dlg-pie">
+    <button class="btn" id="cerrar-config-pie" type="button">Cerrar</button>
+  </div>
+</dialog>
+
+<!-- ============================================================
+     COMPROBANTE (solo al imprimir)
+     ============================================================ -->
+<div class="comprobante" id="comprobante" aria-hidden="true">
+  <div class="cp-encabezado">
+    <div>
+      <p class="cp-institucion">Examen de Ingreso</p>
+      <p class="cp-depto">Departamento de Ingreso · Mesa de entrada</p>
+    </div>
+    <div class="cp-folio">Ficha N.º<br><span id="cp-folio">—</span></div>
+  </div>
+
+  <h1 class="cp-titulo">Ficha de excepción</h1>
+
+  <table class="cp-datos">
+    <tbody>
+      <tr><th scope="row">Legajo</th><td class="mono" id="cp-legajo">—</td></tr>
+      <tr><th scope="row">Alumno</th><td id="cp-alumno">—</td></tr>
+      <tr><th scope="row">Motivo de excepción</th><td id="cp-motivo">—</td></tr>
+      <tr><th scope="row">Fecha de recuperatorio</th><td id="cp-fecha">—</td></tr>
+      <tr><th scope="row">Documentación</th><td id="cp-adjunto">—</td></tr>
+      <tr><th scope="row">Emitida</th><td id="cp-emitida">—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="cp-firmas">
+    <div class="cp-firma">Firma del alumno</div>
+    <div class="cp-firma">Firma y sello · Mesa de entrada</div>
+  </div>
+
+  <p class="cp-legal">
+    Esta ficha deja constancia de la imposibilidad del alumno de asistir a la fecha de curso
+    asignada y de la fecha de recuperatorio otorgada. La documentación respaldatoria queda en poder
+    del Departamento de Ingreso. Emitida por sistema; sin validez sin firma y sello.
+  </p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="padron.js"></script>
+<script>
+'use strict';
+
+/* ============================================================
+   USUARIOS
+
+   ATENCIÓN: estas credenciales están escritas en este archivo y
+   se comprueban en el navegador. Cualquiera que abra el HTML con
+   un editor de texto, o que use el inspector, las ve y puede
+   saltear la pantalla de ingreso. No protegen contra alguien que
+   quiera entrar: sirven para separar roles entre compañeros de
+   oficina y evitar que un operador toque la configuración por
+   error.
+
+   La autenticación real llega con Supabase Auth, que valida
+   contra el servidor y refuerza los permisos con RLS en Postgres.
+   Hasta entonces, no guardar en esta aplicación nada cuya fuga
+   sea un problema.
+
+   El usuario no distingue mayúsculas de minúsculas; la
+   contraseña sí, exacta.
+   ============================================================ */
+const USUARIOS = [
+  { usuario: 'ingreso', clave: 'UADE2026', rol: 'operador', nombre: 'Mesa de entrada' },
+  { usuario: 'Romero',  clave: 'lordalan', rol: 'admin',    nombre: 'Romero' }
+];
+
+/** Qué puede hacer cada rol. El operador solo carga y consulta fichas. */
+const PERMISOS = {
+  operador: ['fichas'],
+  admin: ['fichas', 'configurar']
+};
+
+/* ============================================================
+   CONFIGURACIÓN INICIAL
+   Semilla que se inserta en Supabase cuando las tablas están vacías.
+   ============================================================ */
+const SEMILLA = {
+  largoLegajo: 7,
+  adjuntoMaxMB: 10,
+
+  motivos: [
+    'Superposición con otra fecha del Examen de Ingreso',
+    'Superposición con examen o cursada de otra institución',
+    'Razones de salud (con certificado médico)',
+    'Razones laborales (con constancia del empleador)',
+    'Viaje o residencia temporal en el exterior',
+    'Fallecimiento de familiar directo',
+    'Otro (detallar en la documentación adjunta)'
+  ],
+
+  fechasRecuperatorio: ['2026-09-15', '2026-09-29', '2026-10-13', '2026-10-27']
+};
+
+/* ============================================================
+   NÚCLEO
+   Funciones puras, sin DOM. Viajan tal cual a Next.js/Supabase.
+   ============================================================ */
+
+/**
+ * Comprueba usuario y contraseña.
+ * @returns {{ok:true, sesion:object} | {ok:false, mensaje:string}}
+ */
+function autenticar(usuarioCrudo, claveCruda, usuarios) {
+  const usuario = String(usuarioCrudo || '').trim().toLowerCase();
+  const clave = String(claveCruda || '');
+
+  if (!usuario || !clave) {
+    return { ok: false, mensaje: 'Completá usuario y contraseña.' };
+  }
+
+  const encontrado = usuarios.find((u) => u.usuario.toLowerCase() === usuario && u.clave === clave);
+  if (!encontrado) {
+    // Mismo mensaje para usuario inexistente y contraseña incorrecta:
+    // decir cuál de los dos falló revela qué usuarios existen.
+    return { ok: false, mensaje: 'Usuario o contraseña incorrectos.' };
+  }
+
+  return {
+    ok: true,
+    sesion: { usuario: encontrado.usuario, rol: encontrado.rol, nombre: encontrado.nombre }
+  };
+}
+
+/** ¿La sesión tiene este permiso? */
+function puede(sesion, permiso) {
+  if (!sesion || !sesion.rol) return false;
+  const lista = PERMISOS[sesion.rol];
+  return Array.isArray(lista) && lista.includes(permiso);
+}
+
+/** Deja solo dígitos: 1251113 | '1251113' | ' 1251113 ' -> '1251113' */
+function normalizarLegajo(valor) {
+  return String(valor === null || valor === undefined ? '' : valor).replace(/\D/g, '');
+}
+
+/** Trim, colapso de espacios y limpieza del espacio previo a la coma. */
+function normalizarNombre(valor) {
+  return String(valor === null || valor === undefined ? '' : valor)
+    .replace(/\s+/g, ' ').trim()
+    .replace(/\s+,/g, ',')
+    .replace(/,\s*/g, ', ');
+}
+
+/**
+ * Resuelve un legajo contra el padrón.
+ * estado: 'vacio' | 'incompleto' | 'excedido' | 'inexistente' | 'valido'
+ */
+function resolverLegajo(valorCrudo, padron) {
+  const legajo = normalizarLegajo(valorCrudo);
+  const largo = SEMILLA.largoLegajo;
+  if (legajo.length === 0) return { estado: 'vacio', legajo };
+  if (legajo.length < largo) return { estado: 'incompleto', legajo, faltan: largo - legajo.length };
+  if (legajo.length > largo) return { estado: 'excedido', legajo };
+  const nombre = padron[legajo];
+  if (!nombre) return { estado: 'inexistente', legajo };
+  return { estado: 'valido', legajo, nombre };
+}
+
+/** Mensaje en español para cada estado de validación. */
+function mensajeLegajo(resultado) {
+  switch (resultado.estado) {
+    case 'vacio':
+      return 'Ingresá los 7 dígitos del legajo para validar.';
+    case 'incompleto':
+      return resultado.faltan === 1
+        ? 'Falta 1 dígito para completar el legajo.'
+        : 'Faltan ' + resultado.faltan + ' dígitos para completar el legajo.';
+    case 'excedido':
+      return 'El legajo tiene ' + resultado.legajo.length + ' dígitos. Debe tener exactamente 7.';
+    case 'inexistente':
+      return 'El legajo ' + resultado.legajo + ' no figura en el padrón de alumnos a ingresar. Verificá el número o actualizá el padrón.';
+    case 'valido':
+      return resultado.nombre;
+    default:
+      return '';
+  }
+}
+
+/** Valida el adjunto. @returns {{ok:boolean, mensaje?:string}} */
+function validarAdjunto(archivo, maxMB) {
+  if (!archivo) return { ok: true };
+  const esPdf = archivo.type === 'application/pdf' || /\.pdf$/i.test(archivo.name);
+  if (!esPdf) return { ok: false, mensaje: 'El archivo debe ser un PDF.' };
+  if (archivo.size === 0) return { ok: false, mensaje: 'El archivo está vacío.' };
+  if (archivo.size > maxMB * 1024 * 1024) {
+    return { ok: false, mensaje: 'El PDF pesa ' + (archivo.size / 1048576).toFixed(1) + ' MB y el máximo es ' + maxMB + ' MB.' };
+  }
+  return { ok: true };
+}
+
+/** Fecha ISO -> "Martes 15 de septiembre de 2026" (sin la coma del locale). */
+function fechaLarga(iso) {
+  const [a, m, d] = iso.split('-').map(Number);
+  const texto = new Date(a, m - 1, d).toLocaleDateString('es-AR', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  }).replace(',', '');
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+/** Fecha ISO -> "15/09/2026" */
+function fechaCorta(iso) {
+  const [a, m, d] = iso.split('-');
+  return d + '/' + m + '/' + a;
+}
+
+/** Momento de emisión: "01/09/2026 · 18:20 h" */
+function selloDeTiempo(momento) {
+  const fecha = momento.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const hora = momento.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  return fecha + ' · ' + hora + ' h';
+}
+
+/** Número de ficha determinístico: EX-AAAAMMDD-LEGAJO-HHMM */
+function generarFolio(legajo, momento) {
+  const dd = (n) => String(n).padStart(2, '0');
+  return 'EX-' + momento.getFullYear() + dd(momento.getMonth() + 1) + dd(momento.getDate())
+       + '-' + legajo + '-' + dd(momento.getHours()) + dd(momento.getMinutes());
+}
+
+/** Fecha (objeto Date) -> 'AAAA-MM-DD' en hora local, sin corrimiento por zona. */
+function isoLocal(fecha) {
+  const dd = (n) => String(n).padStart(2, '0');
+  return fecha.getFullYear() + '-' + dd(fecha.getMonth() + 1) + '-' + dd(fecha.getDate());
+}
+
+/** Motivos que el operador puede elegir, en orden de carga. */
+function motivosActivos(config) {
+  return config.motivos.filter((m) => m.activo);
+}
+
+/** Fechas elegibles: activas y no vencidas, más próxima primero. */
+function fechasVigentes(config, hoyIso) {
+  return config.fechas
+    .filter((f) => f.activo && f.iso >= hoyIso)
+    .sort((a, b) => a.iso.localeCompare(b.iso));
+}
+
+/** Convierte filas [[legajo, alumno], ...] al mapa del padrón. */
+function construirPadron(filas) {
+  const padron = {};
+  let descartadas = 0;
+  for (const fila of filas) {
+    const legajo = normalizarLegajo(fila[0]);
+    const nombre = normalizarNombre(fila[1]);
+    if (legajo.length !== SEMILLA.largoLegajo || !nombre) { descartadas++; continue; }
+    padron[legajo] = nombre;
+  }
+  return { padron, descartadas, cantidad: Object.keys(padron).length };
+}
+
+/** Parser CSV con soporte de comillas y separador , o ; */
+function parsearCsv(texto) {
+  const limpio = texto.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
+  const primera = limpio.split('\n')[0];
+  const separador = (primera.match(/;/g) || []).length > (primera.match(/,/g) || []).length ? ';' : ',';
+  const filas = [];
+  let campo = '', fila = [], entreComillas = false;
+
+  for (let i = 0; i < limpio.length; i++) {
+    const c = limpio[i];
+    if (entreComillas) {
+      if (c === '"') {
+        if (limpio[i + 1] === '"') { campo += '"'; i++; } else entreComillas = false;
+      } else campo += c;
+    } else if (c === '"') { entreComillas = true; }
+    else if (c === separador) { fila.push(campo); campo = ''; }
+    else if (c === '\n') { fila.push(campo); filas.push(fila); fila = []; campo = ''; }
+    else campo += c;
+  }
+  fila.push(campo);
+  if (fila.some((v) => v.trim() !== '')) filas.push(fila);
+  return filas;
+}
+
+/**
+ * Escapa un valor para CSV. El separador es ; porque Excel es-AR lo espera,
+ * pero la coma también se entrecomilla: todos los nombres del padrón vienen
+ * como "Apellido, Nombre" y se partirían en dos columnas al abrir el archivo
+ * en un Excel configurado con separador coma.
+ */
+function campoCsv(valor) {
+  const texto = String(valor === null || valor === undefined ? '' : valor);
+  return /[",;\n]/.test(texto) ? '"' + texto.replace(/"/g, '""') + '"' : texto;
+}
+
+/** Arma el CSV completo del listado de fichas. */
+function armarCsv(fichas) {
+  const encabezado = ['Ficha', 'Legajo', 'Alumno', 'Motivo', 'Recuperatorio', 'Documentacion', 'Emitida', 'Operador'];
+  const lineas = [encabezado.join(';')];
+  for (const f of fichas) {
+    lineas.push([
+      f.folio, f.legajo, f.alumno, f.motivo,
+      fechaCorta(f.fechaRecuperatorio),
+      f.adjuntoNombre || 'Sin adjunto',
+      selloDeTiempo(new Date(f.creada)),
+      f.creadaPor || '—'
+    ].map(campoCsv).join(';'));
+  }
+  return lineas.join('\r\n');
+}
+
+/** Filtra el listado por texto libre sobre legajo, alumno, motivo y folio. */
+function filtrarFichas(fichas, consulta) {
+  const termino = String(consulta || '').trim().toLowerCase();
+  if (!termino) return fichas;
+  return fichas.filter((f) =>
+    f.legajo.includes(termino) ||
+    f.alumno.toLowerCase().includes(termino) ||
+    f.motivo.toLowerCase().includes(termino) ||
+    f.folio.toLowerCase().includes(termino)
+  );
+}
+
+/* ============================================================
+   SUPABASE
+   Fichas y configuración en la base compartida.
+   Padrón y sesión siguen en el navegador.
+   ============================================================ */
+const SUPA_URL  = 'https://ffqpgtordxgtedxixpwi.supabase.co';
+const SUPA_ANON = 'sb_publishable_45-9C6cORZBaqTpCH0teiQ_yqlvKI0Y';
+const supa = window.supabase.createClient(SUPA_URL, SUPA_ANON);
+const BUCKET_PDF = 'adjuntos';
+
+const CLAVE_SESION = 'pio.sesion.v1';
+const CLAVE_PADRON = 'pio.padron.v1';
+
+function leerJson(almacen, clave, respaldo) {
+  try {
+    const crudo = almacen.getItem(clave);
+    return crudo ? JSON.parse(crudo) : respaldo;
+  } catch { return respaldo; }
+}
+
+function escribirJson(almacen, clave, valor) {
+  try { almacen.setItem(clave, JSON.stringify(valor)); return true; }
+  catch { return false; }
+}
+
+const motivoDeDB = (r) => ({ id: r.id, texto: r.texto, activo: r.activo });
+const fechaDeDB  = (r) => ({ id: r.id, iso: r.fecha_iso, activo: r.activo });
+const fichaDeDB  = (r) => ({
+  id: r.id, folio: r.folio, legajo: r.legajo, alumno: r.alumno,
+  motivo: r.motivo, fechaRecuperatorio: r.fecha_recuperatorio,
+  adjuntoNombre: r.adjunto_nombre, adjuntoTamano: r.adjunto_tamano,
+  adjuntoPath: r.adjunto_path,
+  creada: r.creada_at, creadaPor: r.creada_por
+});
+
+/* ============================================================
+   ESTADO
+   ============================================================ */
+const estado = {
+  sesion: null,
+  padron: window.PADRON || {},
+  padronMeta: window.PADRON_META || { origen: '—', cantidad: 0, generado: '—' },
+  config: { motivos: [], fechas: [] },
+  fichas: [],
+  alumno: null,
+  adjunto: null,
+  recienCreada: null
+};
+
+const el = (id) => document.getElementById(id);
+
+const dom = {
+  pantallaAcceso: el('pantalla-acceso'),
+  pantallaApp: el('pantalla-app'),
+  formAcceso: el('form-acceso'),
+  usuario: el('usuario'),
+  clave: el('clave'),
+  accesoError: el('acceso-error'),
+
+  barraCantidad: el('barra-cantidad'),
+  abrirConfig: el('abrir-config'),
+  abrirFicha: el('abrir-ficha'),
+  sesionRol: el('sesion-rol'),
+  sesionNombre: el('sesion-nombre'),
+  salir: el('salir'),
+
+  conteo: el('conteo'),
+  buscar: el('buscar'),
+  exportar: el('exportar'),
+  tabla: el('tabla'),
+  cuerpoTabla: el('cuerpo-tabla'),
+  vacio: el('vacio'),
+  vacioTitulo: el('vacio-titulo'),
+  vacioTexto: el('vacio-texto'),
+  vacioAccion: el('vacio-accion'),
+
+  dlgFicha: el('dlg-ficha'),
+  formFicha: el('form-ficha'),
+  cerrarFicha: el('cerrar-ficha'),
+  cancelar: el('cancelar'),
+  legajo: el('legajo'),
+  legajoBloque: el('legajo-bloque'),
+  resolucion: el('resolucion'),
+  motivo: el('motivo'),
+  fecha: el('fecha'),
+  adjunto: el('adjunto'),
+  adjuntoNombre: el('adjunto-nombre'),
+  adjuntoQuitar: el('adjunto-quitar'),
+  adjuntoMax: el('adjunto-max'),
+  guardar: el('guardar'),
+  notaFicha: el('nota-ficha'),
+
+  dlgConfig: el('dlg-config'),
+  cerrarConfig: el('cerrar-config'),
+  cerrarConfigPie: el('cerrar-config-pie'),
+  altaMotivo: el('alta-motivo'),
+  motivoNuevo: el('motivo-nuevo'),
+  listaMotivos: el('lista-motivos'),
+  notaMotivos: el('nota-motivos'),
+  altaFecha: el('alta-fecha'),
+  fechaNueva: el('fecha-nueva'),
+  listaFechas: el('lista-fechas'),
+  notaFechas: el('nota-fechas'),
+  pCantidad: el('p-cantidad'),
+  pOrigen: el('p-origen'),
+  pGenerado: el('p-generado'),
+  padronArchivo: el('padron-archivo'),
+  notaPadron: el('nota-padron')
+};
+
+function avisar(nodo, texto, tipo) {
+  nodo.textContent = texto;
+  if (tipo) nodo.dataset.estado = tipo; else delete nodo.dataset.estado;
+}
+
+/* ============================================================
+   SESIÓN
+   ============================================================ */
+
+async function iniciarSesion(sesion) {
+  estado.sesion = sesion;
+  escribirJson(sessionStorage, CLAVE_SESION, sesion);
+  dom.pantallaAcceso.hidden = true;
+  dom.pantallaApp.hidden = false;
+
+  dom.sesionNombre.textContent = sesion.nombre;
+  dom.sesionRol.textContent = sesion.rol === 'admin' ? 'Admin' : 'Operador';
+  dom.abrirConfig.hidden = !puede(sesion, 'configurar');
+
+  dom.formAcceso.reset();
+  dom.accesoError.hidden = true;
+
+  dom.conteo.textContent = 'Cargando…';
+  dom.tabla.hidden = true;
+  dom.vacio.hidden = true;
+
+  await Promise.all([cargarConfig(), cargarFichas()]);
+  poblarSelects();
+  pintarTabla();
+}
+
+function cerrarSesion() {
+  estado.sesion = null;
+  try { sessionStorage.removeItem(CLAVE_SESION); } catch { /* almacenamiento bloqueado */ }
+  dom.dlgFicha.close();
+  dom.dlgConfig.close();
+  dom.pantallaApp.hidden = true;
+  dom.pantallaAcceso.hidden = false;
+  dom.buscar.value = '';
+  dom.usuario.focus();
+}
+
+/** Corta la acción si la sesión no tiene el permiso. Evita errores, no ataques. */
+function exigir(permiso) {
+  if (puede(estado.sesion, permiso)) return true;
+  window.alert('Tu usuario no tiene permiso para esta acción.');
+  return false;
+}
+
+/* ============================================================
+   CONFIGURACIÓN
+   ============================================================ */
+
+async function cargarConfig() {
+  const [{ data: mData }, { data: fData }] = await Promise.all([
+    supa.from('motivos').select('*').order('creado_at'),
+    supa.from('fechas_recuperatorio').select('*').order('fecha_iso')
+  ]);
+
+  const motivos = (mData || []).map(motivoDeDB);
+  const fechas  = (fData || []).map(fechaDeDB);
+
+  if (motivos.length === 0 && fechas.length === 0) {
+    await sembrarConfig();
+    const [{ data: m2 }, { data: f2 }] = await Promise.all([
+      supa.from('motivos').select('*').order('creado_at'),
+      supa.from('fechas_recuperatorio').select('*').order('fecha_iso')
+    ]);
+    estado.config = { motivos: (m2 || []).map(motivoDeDB), fechas: (f2 || []).map(fechaDeDB) };
+  } else {
+    estado.config = { motivos, fechas };
+  }
+}
+
+async function sembrarConfig() {
+  const motivos = SEMILLA.motivos.map((texto) => ({ texto, activo: true }));
+  const fechas  = SEMILLA.fechasRecuperatorio.map((fecha_iso) => ({ fecha_iso, activo: true }));
+  await Promise.all([
+    supa.from('motivos').insert(motivos),
+    supa.from('fechas_recuperatorio').insert(fechas)
+  ]);
+}
+
+async function cargarFichas() {
+  const { data, error } = await supa.from('fichas').select('*').order('creada_at', { ascending: false });
+  if (error) { console.error('Error cargando fichas:', error); return; }
+  estado.fichas = (data || []).map(fichaDeDB);
+}
+
+function poblarSelects() {
+  const motivos = motivosActivos(estado.config);
+  dom.motivo.replaceChildren(new Option('Seleccioná un motivo', ''));
+  for (const m of motivos) dom.motivo.append(new Option(m.texto, m.texto));
+  dom.motivo.disabled = motivos.length === 0;
+  if (motivos.length === 0) dom.motivo.replaceChildren(new Option('No hay motivos configurados', ''));
+
+  const fechas = fechasVigentes(estado.config, isoLocal(new Date()));
+  dom.fecha.replaceChildren(new Option('Seleccioná una fecha', ''));
+  for (const f of fechas) dom.fecha.append(new Option(fechaLarga(f.iso), f.iso));
+  dom.fecha.disabled = fechas.length === 0;
+  if (fechas.length === 0) dom.fecha.replaceChildren(new Option('No hay fechas de recuperatorio vigentes', ''));
+}
+
+function crearItemConfig(item, etiqueta, alConmutar, alEliminar, extra) {
+  const fila = document.createElement('li');
+  fila.dataset.activo = String(item.activo);
+
+  const texto = document.createElement('span');
+  texto.className = 'item-texto' + (extra && extra.mono ? ' mono' : '');
+  texto.textContent = etiqueta;
+  if (extra && extra.nota) {
+    const nota = document.createElement('span');
+    nota.className = 'item-vencida';
+    nota.textContent = extra.nota;
+    texto.append(nota);
+  }
+
+  const conmutador = document.createElement('label');
+  conmutador.className = 'conmutador';
+  const casilla = document.createElement('input');
+  casilla.type = 'checkbox';
+  casilla.checked = item.activo;
+  casilla.addEventListener('change', () => alConmutar(item, casilla.checked));
+  conmutador.append(casilla, document.createTextNode('Activo'));
+
+  const eliminar = document.createElement('button');
+  eliminar.type = 'button';
+  eliminar.className = 'btn btn-fila btn-riesgo';
+  eliminar.textContent = 'Eliminar';
+  eliminar.addEventListener('click', () => alEliminar(item));
+
+  fila.append(texto, conmutador, eliminar);
+  return fila;
+}
+
+function pintarConfig() {
+  // Motivos
+  dom.listaMotivos.replaceChildren();
+  if (estado.config.motivos.length === 0) {
+    const vacio = document.createElement('li');
+    vacio.className = 'lista-vacia';
+    vacio.textContent = 'No hay motivos cargados. Agregá al menos uno para poder emitir fichas.';
+    dom.listaMotivos.append(vacio);
+  } else {
+    for (const motivo of estado.config.motivos) {
+      dom.listaMotivos.append(crearItemConfig(motivo, motivo.texto, conmutarMotivo, eliminarMotivo, null));
+    }
+  }
+
+  // Fechas
+  const hoy = isoLocal(new Date());
+  dom.listaFechas.replaceChildren();
+  if (estado.config.fechas.length === 0) {
+    const vacio = document.createElement('li');
+    vacio.className = 'lista-vacia';
+    vacio.textContent = 'No hay fechas cargadas. Agregá al menos una para poder emitir fichas.';
+    dom.listaFechas.append(vacio);
+  } else {
+    const ordenadas = [...estado.config.fechas].sort((a, b) => a.iso.localeCompare(b.iso));
+    for (const fecha of ordenadas) {
+      const vencida = fecha.iso < hoy;
+      dom.listaFechas.append(crearItemConfig(
+        fecha, fechaLarga(fecha.iso), conmutarFecha, eliminarFecha,
+        { mono: false, nota: vencida ? 'vencida' : '' }
+      ));
+    }
+  }
+
+  refrescarPadron();
+}
+
+async function agregarMotivo(texto) {
+  if (!exigir('configurar')) return;
+  const limpio = String(texto || '').replace(/\s+/g, ' ').trim();
+  if (!limpio) { avisar(dom.notaMotivos, 'Escribí el texto del motivo.', 'error'); return; }
+  const repetido = estado.config.motivos.some((m) => m.texto.toLowerCase() === limpio.toLowerCase());
+  if (repetido) { avisar(dom.notaMotivos, 'Ese motivo ya está en la lista.', 'error'); return; }
+  avisar(dom.notaMotivos, 'Guardando…', null);
+  const { error } = await supa.from('motivos').insert({ texto: limpio, activo: true });
+  if (error) { avisar(dom.notaMotivos, 'No se pudo guardar. Intentá de nuevo.', 'error'); return; }
+  dom.motivoNuevo.value = '';
+  await cargarConfig();
+  pintarConfig();
+  poblarSelects();
+  avisar(dom.notaMotivos, 'Motivo agregado.', 'ok');
+}
+
+async function conmutarMotivo(motivo, activo) {
+  if (!exigir('configurar')) return;
+  motivo.activo = activo;
+  pintarConfig();
+  poblarSelects();
+  const { error } = await supa.from('motivos').update({ activo }).eq('id', motivo.id);
+  if (error) {
+    motivo.activo = !activo;
+    pintarConfig();
+    poblarSelects();
+    avisar(dom.notaMotivos, 'No se pudo guardar el cambio.', 'error');
+  } else {
+    avisar(dom.notaMotivos, activo ? 'Motivo activado.' : 'Motivo desactivado: deja de aparecer en las fichas nuevas.', 'ok');
+  }
+}
+
+async function eliminarMotivo(motivo) {
+  if (!exigir('configurar')) return;
+  const confirmado = window.confirm(
+    'Eliminar el motivo "' + motivo.texto + '"?\n\n' +
+    'Las fichas ya emitidas conservan su motivo: guardan el texto, no una referencia. ' +
+    'Si solo querés que deje de aparecer en las fichas nuevas, desactivalo en vez de eliminarlo.'
+  );
+  if (!confirmado) return;
+  const { error } = await supa.from('motivos').delete().eq('id', motivo.id);
+  if (error) { avisar(dom.notaMotivos, 'No se pudo eliminar.', 'error'); return; }
+  await cargarConfig();
+  pintarConfig();
+  poblarSelects();
+  avisar(dom.notaMotivos, 'Motivo eliminado.', 'ok');
+}
+
+async function agregarFecha(iso) {
+  if (!exigir('configurar')) return;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(iso || ''))) {
+    avisar(dom.notaFechas, 'Elegí una fecha válida.', 'error');
+    return;
+  }
+  if (estado.config.fechas.some((f) => f.iso === iso)) {
+    avisar(dom.notaFechas, 'Esa fecha ya está en la lista.', 'error');
+    return;
+  }
+  avisar(dom.notaFechas, 'Guardando…', null);
+  const { error } = await supa.from('fechas_recuperatorio').insert({ fecha_iso: iso, activo: true });
+  if (error) { avisar(dom.notaFechas, 'No se pudo guardar.', 'error'); return; }
+  dom.fechaNueva.value = '';
+  await cargarConfig();
+  pintarConfig();
+  poblarSelects();
+  const vencida = iso < isoLocal(new Date());
+  avisar(dom.notaFechas, vencida
+    ? 'Fecha agregada, pero ya pasó: no va a aparecer en las fichas nuevas.'
+    : 'Fecha agregada.', 'ok');
+}
+
+async function conmutarFecha(fecha, activo) {
+  if (!exigir('configurar')) return;
+  fecha.activo = activo;
+  pintarConfig();
+  poblarSelects();
+  const { error } = await supa.from('fechas_recuperatorio').update({ activo }).eq('id', fecha.id);
+  if (error) {
+    fecha.activo = !activo;
+    pintarConfig();
+    poblarSelects();
+    avisar(dom.notaFechas, 'No se pudo guardar el cambio.', 'error');
+  } else {
+    avisar(dom.notaFechas, activo ? 'Fecha activada.' : 'Fecha desactivada: deja de aparecer en las fichas nuevas.', 'ok');
+  }
+}
+
+async function eliminarFecha(fecha) {
+  if (!exigir('configurar')) return;
+  const confirmado = window.confirm(
+    'Eliminar la fecha ' + fechaLarga(fecha.iso) + '?\n\n' +
+    'Las fichas ya emitidas conservan su fecha. Si solo querés que deje de ofrecerse, desactivala.'
+  );
+  if (!confirmado) return;
+  const { error } = await supa.from('fechas_recuperatorio').delete().eq('id', fecha.id);
+  if (error) { avisar(dom.notaFechas, 'No se pudo eliminar.', 'error'); return; }
+  await cargarConfig();
+  pintarConfig();
+  poblarSelects();
+  avisar(dom.notaFechas, 'Fecha eliminada.', 'ok');
+}
+
+/* ============================================================
+   TABLA
+   ============================================================ */
+
+function crearBotonPdf(ficha) {
+  const boton = document.createElement('button');
+  boton.type = 'button';
+  boton.className = 'enlace-pdf';
+  boton.textContent = ficha.adjuntoNombre;
+  boton.title = 'Abrir ' + ficha.adjuntoNombre;
+  boton.addEventListener('click', () => abrirPdf(ficha, boton));
+  return boton;
+}
+
+function crearFila(ficha) {
+  const fila = document.createElement('tr');
+  if (ficha.id === estado.recienCreada) fila.className = 'nueva';
+
+  const legajo = document.createElement('td');
+  legajo.className = 'celda-legajo';
+  legajo.textContent = ficha.legajo;
+
+  const alumno = document.createElement('td');
+  alumno.className = 'celda-alumno';
+  alumno.textContent = ficha.alumno;
+
+  const motivo = document.createElement('td');
+  motivo.className = 'celda-motivo';
+  motivo.textContent = ficha.motivo;
+
+  const recuperatorio = document.createElement('td');
+  recuperatorio.className = 'celda-fecha';
+  recuperatorio.textContent = fechaCorta(ficha.fechaRecuperatorio);
+
+  const documentacion = document.createElement('td');
+  if (ficha.adjuntoNombre) {
+    documentacion.append(crearBotonPdf(ficha));
+  } else {
+    const sin = document.createElement('span');
+    sin.className = 'sin-pdf';
+    sin.textContent = 'Sin adjunto';
+    documentacion.append(sin);
+  }
+
+  const folio = document.createElement('td');
+  folio.className = 'celda-folio';
+  folio.textContent = ficha.folio;
+
+  const acciones = document.createElement('td');
+  acciones.className = 'celda-acciones';
+  const imprimir = document.createElement('button');
+  imprimir.type = 'button';
+  imprimir.className = 'btn btn-fila';
+  imprimir.textContent = 'Imprimir';
+  imprimir.addEventListener('click', () => imprimirFicha(ficha));
+  acciones.append(imprimir);
+
+  fila.append(legajo, alumno, motivo, recuperatorio, documentacion, folio, acciones);
+  return fila;
+}
+
+function pintarTabla() {
+  const visibles = filtrarFichas(estado.fichas, dom.buscar.value);
+  const hayFichas = estado.fichas.length > 0;
+  const hayVisibles = visibles.length > 0;
+
+  dom.cuerpoTabla.replaceChildren();
+  for (const ficha of visibles) dom.cuerpoTabla.append(crearFila(ficha));
+
+  dom.tabla.hidden = !hayVisibles;
+  dom.vacio.hidden = hayVisibles;
+
+  if (!hayFichas) {
+    dom.vacioTitulo.textContent = 'Todavía no hay fichas cargadas';
+    dom.vacioTexto.textContent = 'Cada ficha registra a un alumno inscripto que no podrá asistir a la fecha de curso asignada y la fecha de recuperatorio que se le otorga.';
+    dom.vacioAccion.hidden = false;
+    dom.conteo.textContent = 'Sin fichas cargadas';
+  } else if (!hayVisibles) {
+    dom.vacioTitulo.textContent = 'Ninguna ficha coincide con la búsqueda';
+    dom.vacioTexto.textContent = 'Probá con otro legajo, apellido o motivo.';
+    dom.vacioAccion.hidden = true;
+    dom.conteo.textContent = '0 de ' + estado.fichas.length + ' fichas';
+  } else {
+    dom.conteo.textContent = visibles.length === estado.fichas.length
+      ? (estado.fichas.length === 1 ? '1 ficha' : estado.fichas.length + ' fichas')
+      : visibles.length + ' de ' + estado.fichas.length + ' fichas';
+  }
+
+  dom.exportar.disabled = !hayVisibles;
+  estado.recienCreada = null;
+}
+
+async function abrirPdf(ficha, boton) {
+  const textoOriginal = boton.textContent;
+  boton.disabled = true;
+  boton.textContent = 'Abriendo…';
+  try {
+    if (!ficha.adjuntoPath) {
+      boton.textContent = 'No disponible';
+      boton.title = 'El PDF no está en la nube.';
+      return;
+    }
+    const { data, error } = await supa.storage.from(BUCKET_PDF).createSignedUrl(ficha.adjuntoPath, 3600);
+    if (error || !data) { boton.textContent = 'No disponible'; return; }
+    const ventana = window.open(data.signedUrl, '_blank');
+    if (!ventana) {
+      const enlace = document.createElement('a');
+      enlace.href = data.signedUrl;
+      enlace.target = '_blank';
+      enlace.click();
+    }
+    boton.textContent = textoOriginal;
+  } catch {
+    boton.textContent = 'Error';
+  } finally {
+    boton.disabled = false;
+  }
+}
+
+function imprimirFicha(ficha) {
+  el('cp-folio').textContent = ficha.folio;
+  el('cp-legajo').textContent = ficha.legajo;
+  el('cp-alumno').textContent = ficha.alumno;
+  el('cp-motivo').textContent = ficha.motivo;
+  el('cp-fecha').textContent = fechaLarga(ficha.fechaRecuperatorio);
+  el('cp-adjunto').textContent = ficha.adjuntoNombre
+    ? ficha.adjuntoNombre + ' (' + (ficha.adjuntoTamano / 1048576).toFixed(2) + ' MB)'
+    : 'Sin documentación adjunta';
+  el('cp-emitida').textContent = selloDeTiempo(new Date(ficha.creada));
+  window.print();
+}
+
+function exportarCsv() {
+  const visibles = filtrarFichas(estado.fichas, dom.buscar.value);
+  if (visibles.length === 0) return;
+  // El BOM hace que Excel abra el archivo en UTF-8 sin romper los acentos.
+  const contenido = new Blob(['﻿' + armarCsv(visibles)], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(contenido);
+  const enlace = document.createElement('a');
+  enlace.href = url;
+  enlace.download = 'fichas-excepcion-' + isoLocal(new Date()) + '.csv';
+  enlace.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+/* ============================================================
+   DIÁLOGO DE FICHA
+   ============================================================ */
+
+function evaluarLegajo() {
+  const resultado = resolverLegajo(dom.legajo.value, estado.padron);
+  dom.legajoBloque.dataset.estado = resultado.estado;
+  dom.resolucion.dataset.estado = resultado.estado;
+
+  if (resultado.estado === 'valido') {
+    const marca = document.createElement('span');
+    marca.className = 'resolucion-marca';
+    marca.textContent = 'Legajo verificado';
+    const nombre = document.createElement('span');
+    nombre.className = 'resolucion-nombre';
+    nombre.textContent = resultado.nombre;
+    dom.resolucion.replaceChildren(marca, nombre);
+    estado.alumno = { legajo: resultado.legajo, nombre: resultado.nombre };
+  } else {
+    dom.resolucion.textContent = mensajeLegajo(resultado);
+    estado.alumno = null;
+  }
+  refrescarBotonGuardar();
+}
+
+function refrescarBotonGuardar() {
+  dom.guardar.disabled = !(estado.alumno && dom.motivo.value && dom.fecha.value);
+}
+
+function limpiarAdjunto() {
+  dom.adjunto.value = '';
+  estado.adjunto = null;
+  dom.adjuntoNombre.textContent = 'Ningún archivo seleccionado';
+  dom.adjuntoQuitar.hidden = true;
+}
+
+function abrirDialogoFicha() {
+  if (!exigir('fichas')) return;
+  poblarSelects();
+  dom.formFicha.reset();
+  estado.alumno = null;
+  limpiarAdjunto();
+  avisar(dom.notaFicha, '', null);
+  evaluarLegajo();
+  dom.dlgFicha.showModal();
+  dom.legajo.focus();
+}
+
+async function guardarFicha() {
+  if (!exigir('fichas')) return;
+  if (!estado.alumno) {
+    avisar(dom.notaFicha, 'Validá primero el legajo del alumno.', 'error');
+    dom.legajo.focus();
+    return;
+  }
+  if (!dom.motivo.value) {
+    avisar(dom.notaFicha, 'Seleccioná el motivo de la excepción.', 'error');
+    dom.motivo.focus();
+    return;
+  }
+  if (!dom.fecha.value) {
+    avisar(dom.notaFicha, 'Seleccioná la fecha de recuperatorio.', 'error');
+    dom.fecha.focus();
+    return;
+  }
+  const revision = validarAdjunto(estado.adjunto, SEMILLA.adjuntoMaxMB);
+  if (!revision.ok) {
+    avisar(dom.notaFicha, revision.mensaje, 'error');
+    return;
+  }
+
+  const momento = new Date();
+  const ficha = {
+    id: crypto.randomUUID(),
+    folio: generarFolio(estado.alumno.legajo, momento),
+    legajo: estado.alumno.legajo,
+    alumno: estado.alumno.nombre,
+    motivo: dom.motivo.value,
+    fechaRecuperatorio: dom.fecha.value,
+    adjuntoNombre: estado.adjunto ? estado.adjunto.name : null,
+    adjuntoTamano: estado.adjunto ? estado.adjunto.size : null,
+    adjuntoPath: null,
+    creada: momento.toISOString(),
+    creadaPor: estado.sesion ? estado.sesion.usuario : '—'
+  };
+
+  dom.guardar.disabled = true;
+  avisar(dom.notaFicha, 'Guardando…', null);
+
+  if (estado.adjunto) {
+    const ruta = ficha.folio + '/' + estado.adjunto.name;
+    const { data: upData, error: upError } = await supa.storage
+      .from(BUCKET_PDF)
+      .upload(ruta, estado.adjunto, { contentType: 'application/pdf' });
+    if (upError) {
+      ficha.adjuntoNombre = null;
+      ficha.adjuntoTamano = null;
+      avisar(dom.notaFicha, 'No se pudo subir el PDF. La ficha se guarda sin adjunto.', 'error');
+    } else {
+      ficha.adjuntoPath = upData.path;
+    }
+  }
+
+  const { error: dbError } = await supa.from('fichas').insert({
+    id: ficha.id,
+    folio: ficha.folio,
+    legajo: ficha.legajo,
+    alumno: ficha.alumno,
+    motivo: ficha.motivo,
+    fecha_recuperatorio: ficha.fechaRecuperatorio,
+    adjunto_nombre: ficha.adjuntoNombre,
+    adjunto_tamano: ficha.adjuntoTamano,
+    adjunto_path: ficha.adjuntoPath,
+    creada_por: ficha.creadaPor
+  });
+
+  if (dbError) {
+    dom.guardar.disabled = false;
+    avisar(dom.notaFicha, 'No se pudo guardar la ficha. Intentá de nuevo.', 'error');
+    return;
+  }
+
+  estado.fichas.unshift(ficha);
+  estado.recienCreada = ficha.id;
+  pintarTabla();
+  dom.dlgFicha.close();
+}
+
+/* ============================================================
+   PADRÓN
+   ============================================================ */
+
+function refrescarPadron() {
+  const meta = estado.padronMeta;
+  const cantidad = meta.cantidad.toLocaleString('es-AR');
+  dom.barraCantidad.textContent = cantidad;
+  dom.pCantidad.textContent = cantidad;
+  dom.pOrigen.textContent = meta.origen;
+  dom.pGenerado.textContent = meta.generado;
+}
+
+function recuperarPadronGuardado() {
+  const guardado = leerJson(localStorage, CLAVE_PADRON, null);
+  if (guardado && guardado.padron && guardado.meta) {
+    estado.padron = guardado.padron;
+    estado.padronMeta = guardado.meta;
+  }
+}
+
+/** Ubica las columnas legajo/alumno por encabezado; si no hay, usa 0 y 1. */
+function filasDeDatos(filas) {
+  if (filas.length === 0) return [];
+  const encabezado = filas[0].map((c) => String(c || '').trim().toLowerCase());
+  let iLegajo = encabezado.findIndex((c) => c.includes('legajo') || c === 'lu');
+  let iAlumno = encabezado.findIndex((c) => c.includes('alumno') || c.includes('nombre') || c.includes('apellido'));
+  let desde = 1;
+  if (iLegajo === -1 || iAlumno === -1) { iLegajo = 0; iAlumno = 1; desde = 0; }
+  return filas.slice(desde).map((f) => [f[iLegajo], f[iAlumno]]);
+}
+
+function cargarSheetJs() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return new Promise((resolver, rechazar) => {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    script.onload = () => window.XLSX ? resolver(window.XLSX) : rechazar(new Error('sin XLSX'));
+    script.onerror = () => rechazar(new Error('sin red'));
+    document.head.append(script);
+  });
+}
+
+async function leerFilasDelArchivo(archivo) {
+  if (/\.csv$/i.test(archivo.name)) return parsearCsv(await archivo.text());
+  const XLSX = await cargarSheetJs();
+  const libro = XLSX.read(await archivo.arrayBuffer(), { type: 'array' });
+  const hoja = libro.Sheets[libro.SheetNames[0]];
+  return XLSX.utils.sheet_to_json(hoja, { header: 1, raw: true, defval: '' });
+}
+
+async function actualizarPadron(archivo) {
+  if (!exigir('configurar')) return;
+  avisar(dom.notaPadron, 'Leyendo ' + archivo.name + '…', null);
+  try {
+    const resultado = construirPadron(filasDeDatos(await leerFilasDelArchivo(archivo)));
+    if (resultado.cantidad === 0) {
+      avisar(dom.notaPadron, 'No se encontró ningún legajo válido. Revisá que el archivo tenga columnas "legajo" y "alumno".', 'error');
+      return;
+    }
+
+    estado.padron = resultado.padron;
+    estado.padronMeta = {
+      origen: archivo.name,
+      cantidad: resultado.cantidad,
+      generado: isoLocal(new Date())
+    };
+
+    const persistido = escribirJson(localStorage, CLAVE_PADRON, { padron: estado.padron, meta: estado.padronMeta });
+    refrescarPadron();
+
+    let texto = resultado.cantidad.toLocaleString('es-AR') + ' legajos cargados';
+    if (resultado.descartadas > 0) texto += ' · ' + resultado.descartadas + ' filas descartadas';
+    if (!persistido) texto += ' · no se pudo guardar en este navegador';
+    avisar(dom.notaPadron, texto, 'ok');
+  } catch (error) {
+    avisar(dom.notaPadron, error && error.message === 'sin red'
+      ? 'No se pudo leer el Excel sin conexión. Guardá el archivo como CSV desde Excel y volvé a intentar.'
+      : 'No se pudo leer el archivo. Verificá que sea un Excel o CSV con columnas "legajo" y "alumno".', 'error');
+  }
+}
+
+/* ============================================================
+   EVENTOS
+   ============================================================ */
+
+dom.formAcceso.addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  const resultado = autenticar(dom.usuario.value, dom.clave.value, USUARIOS);
+  if (!resultado.ok) {
+    dom.accesoError.textContent = resultado.mensaje;
+    dom.accesoError.hidden = false;
+    dom.clave.value = '';
+    dom.clave.focus();
+    return;
+  }
+  await iniciarSesion(resultado.sesion);
+});
+
+dom.salir.addEventListener('click', cerrarSesion);
+
+dom.abrirFicha.addEventListener('click', abrirDialogoFicha);
+dom.vacioAccion.addEventListener('click', abrirDialogoFicha);
+dom.cerrarFicha.addEventListener('click', () => dom.dlgFicha.close());
+dom.cancelar.addEventListener('click', () => dom.dlgFicha.close());
+
+dom.formFicha.addEventListener('submit', (evento) => {
+  evento.preventDefault();
+  guardarFicha();
+});
+
+dom.legajo.addEventListener('input', () => {
+  const soloDigitos = dom.legajo.value.replace(/\D/g, '');
+  if (dom.legajo.value !== soloDigitos) dom.legajo.value = soloDigitos;
+  avisar(dom.notaFicha, '', null);
+  evaluarLegajo();
+});
+
+dom.motivo.addEventListener('change', () => { avisar(dom.notaFicha, '', null); refrescarBotonGuardar(); });
+dom.fecha.addEventListener('change',  () => { avisar(dom.notaFicha, '', null); refrescarBotonGuardar(); });
+
+dom.adjunto.addEventListener('change', () => {
+  const archivo = dom.adjunto.files[0] || null;
+  if (!archivo) { limpiarAdjunto(); return; }
+
+  const revision = validarAdjunto(archivo, SEMILLA.adjuntoMaxMB);
+  if (!revision.ok) {
+    limpiarAdjunto();
+    avisar(dom.notaFicha, revision.mensaje, 'error');
+    return;
+  }
+
+  estado.adjunto = archivo;
+  dom.adjuntoNombre.textContent = archivo.name + ' · ' + (archivo.size / 1048576).toFixed(2) + ' MB';
+  dom.adjuntoQuitar.hidden = false;
+  avisar(dom.notaFicha, '', null);
+});
+
+dom.adjuntoQuitar.addEventListener('click', () => { limpiarAdjunto(); dom.adjunto.focus(); });
+
+dom.abrirConfig.addEventListener('click', () => {
+  if (!exigir('configurar')) return;
+  avisar(dom.notaMotivos, '', null);
+  avisar(dom.notaFechas, '', null);
+  avisar(dom.notaPadron, '', null);
+  pintarConfig();
+  dom.dlgConfig.showModal();
+});
+dom.cerrarConfig.addEventListener('click', () => dom.dlgConfig.close());
+dom.cerrarConfigPie.addEventListener('click', () => dom.dlgConfig.close());
+
+dom.altaMotivo.addEventListener('submit', (evento) => {
+  evento.preventDefault();
+  agregarMotivo(dom.motivoNuevo.value);
+});
+
+dom.altaFecha.addEventListener('submit', (evento) => {
+  evento.preventDefault();
+  agregarFecha(dom.fechaNueva.value);
+});
+
+dom.padronArchivo.addEventListener('change', () => {
+  const archivo = dom.padronArchivo.files[0];
+  if (archivo) actualizarPadron(archivo);
+  dom.padronArchivo.value = '';
+});
+
+dom.buscar.addEventListener('input', pintarTabla);
+dom.exportar.addEventListener('click', exportarCsv);
+
+/* ============================================================
+   INICIO
+   ============================================================ */
+dom.adjuntoMax.textContent = String(SEMILLA.adjuntoMaxMB);
+recuperarPadronGuardado();
+refrescarPadron();
+
+const sesionGuardada = leerJson(sessionStorage, CLAVE_SESION, null);
+if (sesionGuardada && sesionGuardada.rol && PERMISOS[sesionGuardada.rol]) {
+  iniciarSesion(sesionGuardada);
+} else {
+  dom.usuario.focus();
+}
+
+/* ============================================================
+   AUTOCOMPROBACIÓN
+   Abrir con ?test en la URL y mirar la consola.
+   ============================================================ */
+if (location.search.includes('test')) {
+  const padronPrueba = { '1251113': 'Lovera Roja, Daniel' };
+  const iguales = (a, b, caso) => {
+    if (a !== b) throw new Error(caso + ' — esperado ' + JSON.stringify(b) + ', obtenido ' + JSON.stringify(a));
+  };
+
+  // Acceso
+  iguales(autenticar('ingreso', 'UADE2026', USUARIOS).ok, true, 'operador ingresa');
+  iguales(autenticar('ingreso', 'UADE2026', USUARIOS).sesion.rol, 'operador', 'rol del operador');
+  iguales(autenticar('INGRESO', 'UADE2026', USUARIOS).ok, true, 'usuario sin distinguir mayúsculas');
+  iguales(autenticar('  ingreso  ', 'UADE2026', USUARIOS).ok, true, 'usuario con espacios');
+  iguales(autenticar('ingreso', 'uade2026', USUARIOS).ok, false, 'contraseña distingue mayúsculas');
+  iguales(autenticar('Romero', 'lordalan', USUARIOS).sesion.rol, 'admin', 'rol del admin');
+  iguales(autenticar('romero', 'lordalan', USUARIOS).ok, true, 'admin sin distinguir mayúsculas');
+  iguales(autenticar('romero', 'LORDALAN', USUARIOS).ok, false, 'contraseña del admin exacta');
+  iguales(autenticar('otro', 'x', USUARIOS).ok, false, 'usuario inexistente');
+  iguales(autenticar('', '', USUARIOS).mensaje, 'Completá usuario y contraseña.', 'campos vacíos');
+  iguales(autenticar('ingreso', 'mal', USUARIOS).mensaje,
+          autenticar('nadie', 'mal', USUARIOS).mensaje, 'el error no revela qué usuarios existen');
+
+  // Permisos
+  const sesionOperador = { usuario: 'ingreso', rol: 'operador', nombre: 'Mesa de entrada' };
+  const sesionAdmin = { usuario: 'Romero', rol: 'admin', nombre: 'Romero' };
+  iguales(puede(sesionOperador, 'fichas'), true, 'operador carga fichas');
+  iguales(puede(sesionOperador, 'configurar'), false, 'operador no configura');
+  iguales(puede(sesionAdmin, 'fichas'), true, 'admin carga fichas');
+  iguales(puede(sesionAdmin, 'configurar'), true, 'admin configura');
+  iguales(puede(null, 'fichas'), false, 'sin sesión no puede nada');
+  iguales(puede({ rol: 'inventado' }, 'fichas'), false, 'rol desconocido no puede nada');
+
+  // Configuración
+  const configPrueba = {
+    motivos: [
+      { id: '1', texto: 'Salud', activo: true },
+      { id: '2', texto: 'Viaje', activo: false }
+    ],
+    fechas: [
+      { id: 'a', iso: '2026-09-29', activo: true },
+      { id: 'b', iso: '2026-10-13', activo: false },
+      { id: 'c', iso: '2020-01-01', activo: true },
+      { id: 'd', iso: '2026-09-15', activo: true }
+    ]
+  };
+  iguales(motivosActivos(configPrueba).length, 1, 'solo motivos activos');
+  iguales(motivosActivos(configPrueba)[0].texto, 'Salud', 'motivo activo correcto');
+
+  const vigentes = fechasVigentes(configPrueba, '2026-09-01');
+  iguales(vigentes.length, 2, 'excluye inactivas y vencidas');
+  iguales(vigentes[0].iso, '2026-09-15', 'ordena por proximidad');
+  iguales(vigentes[1].iso, '2026-09-29', 'segunda fecha en orden');
+  iguales(fechasVigentes(configPrueba, '2026-12-31').length, 0, 'todas vencidas');
+
+  iguales(isoLocal(new Date(2026, 8, 1)), '2026-09-01', 'ISO local sin corrimiento de zona');
+  iguales(isoLocal(new Date(2026, 0, 5)), '2026-01-05', 'ISO local con ceros');
+
+  // Legajos
+  iguales(normalizarLegajo(1251113), '1251113', 'legajo numérico');
+  iguales(normalizarLegajo(' 1251113 '), '1251113', 'legajo con espacios');
+  iguales(normalizarLegajo('12-51113'), '1251113', 'legajo con guión');
+  iguales(normalizarLegajo(null), '', 'legajo nulo');
+
+  iguales(normalizarNombre('Cvitanich  , Luana Abril '), 'Cvitanich, Luana Abril', 'nombre sucio');
+  iguales(normalizarNombre('Garnica,Jazmin'), 'Garnica, Jazmin', 'coma sin espacio');
+
+  iguales(resolverLegajo('', padronPrueba).estado, 'vacio', 'estado vacío');
+  iguales(resolverLegajo('125', padronPrueba).estado, 'incompleto', 'estado incompleto');
+  iguales(resolverLegajo('125', padronPrueba).faltan, 4, 'dígitos faltantes');
+  iguales(resolverLegajo('12511133', padronPrueba).estado, 'excedido', 'estado excedido');
+  iguales(resolverLegajo('9999999', padronPrueba).estado, 'inexistente', 'estado inexistente');
+  iguales(resolverLegajo(1251113, padronPrueba).estado, 'valido', 'estado válido con número');
+  iguales(resolverLegajo(' 1251113 ', padronPrueba).nombre, 'Lovera Roja, Daniel', 'nombre resuelto');
+
+  // Adjuntos
+  iguales(validarAdjunto(null, 10).ok, true, 'adjunto ausente es válido');
+  iguales(validarAdjunto({ name: 'a.txt', type: 'text/plain', size: 10 }, 10).ok, false, 'rechaza no-PDF');
+  iguales(validarAdjunto({ name: 'a.pdf', type: 'application/pdf', size: 20 * 1048576 }, 10).ok, false, 'rechaza PDF pesado');
+  iguales(validarAdjunto({ name: 'a.pdf', type: 'application/pdf', size: 0 }, 10).ok, false, 'rechaza PDF vacío');
+  iguales(validarAdjunto({ name: 'a.pdf', type: 'application/pdf', size: 1024 }, 10).ok, true, 'acepta PDF válido');
+
+  // Padrón y CSV
+  const construido = construirPadron([[1251113, 'Lovera Roja, Daniel'], ['', 'Sin legajo'], ['123', 'Corto']]);
+  iguales(construido.cantidad, 1, 'padrón construido');
+  iguales(construido.descartadas, 2, 'filas descartadas');
+
+  const csv = parsearCsv('legajo,alumno\n1251113,"Lovera Roja, Daniel"\n');
+  iguales(csv.length, 2, 'filas CSV');
+  iguales(csv[1][1], 'Lovera Roja, Daniel', 'CSV con coma entre comillas');
+
+  iguales(generarFolio('1251113', new Date(2026, 8, 1, 9, 5)), 'EX-20260901-1251113-0905', 'folio');
+  iguales(fechaLarga('2026-09-29'), 'Martes 29 de septiembre de 2026', 'fecha larga sin coma');
+  iguales(fechaCorta('2026-09-29'), '29/09/2026', 'fecha corta');
+  iguales(selloDeTiempo(new Date(2026, 8, 1, 18, 20)), '01/09/2026 · 18:20 h', 'sello 24 h');
+  iguales(selloDeTiempo(new Date(2026, 8, 1, 9, 5)), '01/09/2026 · 09:05 h', 'sello con cero a la izquierda');
+
+  const muestra = [
+    { id: 'a', folio: 'EX-1', legajo: '1251113', alumno: 'Lovera Roja, Daniel',
+      motivo: 'Razones de salud', fechaRecuperatorio: '2026-09-29',
+      adjuntoNombre: 'cert.pdf', adjuntoTamano: 1024,
+      creada: new Date(2026, 8, 1, 18, 20).toISOString(), creadaPor: 'ingreso' },
+    { id: 'b', folio: 'EX-2', legajo: '1250173', alumno: 'Garnica, Jazmin Julia',
+      motivo: 'Viaje al exterior', fechaRecuperatorio: '2026-10-13',
+      adjuntoNombre: null, adjuntoTamano: null,
+      creada: new Date(2026, 8, 1, 18, 25).toISOString(), creadaPor: 'Romero' }
+  ];
+
+  iguales(filtrarFichas(muestra, '').length, 2, 'filtro vacío devuelve todo');
+  iguales(filtrarFichas(muestra, '1251113').length, 1, 'filtro por legajo');
+  iguales(filtrarFichas(muestra, 'garnica').length, 1, 'filtro por apellido sin distinguir mayúsculas');
+  iguales(filtrarFichas(muestra, 'salud').length, 1, 'filtro por motivo');
+  iguales(filtrarFichas(muestra, 'zzz').length, 0, 'filtro sin coincidencias');
+
+  iguales(campoCsv('Lovera; Daniel'), '"Lovera; Daniel"', 'CSV entrecomilla el separador');
+  iguales(campoCsv('Lovera Roja, Daniel'), '"Lovera Roja, Daniel"', 'CSV entrecomilla la coma del nombre');
+  iguales(campoCsv('Dijo "hola"'), '"Dijo ""hola"""', 'CSV duplica las comillas');
+  iguales(campoCsv('Simple'), 'Simple', 'CSV deja el valor simple sin tocar');
+
+  const exportado = armarCsv(muestra).split('\r\n');
+  iguales(exportado.length, 3, 'CSV con encabezado y dos filas');
+  iguales(exportado[0], 'Ficha;Legajo;Alumno;Motivo;Recuperatorio;Documentacion;Emitida;Operador', 'encabezado CSV');
+  iguales(exportado[1], 'EX-1;1251113;"Lovera Roja, Daniel";Razones de salud;29/09/2026;cert.pdf;01/09/2026 · 18:20 h;ingreso', 'fila CSV con adjunto');
+  iguales(exportado[2].includes('Sin adjunto'), true, 'fila CSV sin adjunto');
+
+  console.log('%c✓ Autocomprobación completa: todo en orden', 'color:#16704a;font-weight:700');
+}
+</script>
+</body>
+</html>
