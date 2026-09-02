@@ -133,19 +133,24 @@ body {
   font-size: 12px; font-weight: 600; letter-spacing: 0.1em;
   text-transform: uppercase; color: rgba(255, 255, 255, 0.72); white-space: nowrap;
 }
-/* Navegación entre las dos vistas: listado y alta. */
-.barra-nav { display: flex; gap: var(--sp-1); }
+/* Navegación entre las dos vistas: listado y alta.
+   Las dos son cajas blancas separadas, para que se lean como un par de
+   opciones sobre el borgoña. El relleno es lo único que distingue en qué
+   vista estás, así que el borde mide igual en los dos estados: si cambiara,
+   el botón saltaría de tamaño al conmutar. */
+.barra-nav { display: flex; gap: var(--sp-3); }
 .nav-btn {
-  min-height: 38px; padding: 0 var(--sp-4);
-  border: 1px solid transparent; border-radius: 2px;
-  background: transparent; color: rgba(255, 255, 255, 0.82);
+  min-height: 40px; padding: 0 var(--sp-5);
+  border: 1.5px solid #fff; border-radius: 3px;
+  background: transparent; color: #fff;
   font-family: var(--sans); font-size: 14.5px; font-weight: 600;
   white-space: nowrap; cursor: pointer;
   transition: background-color 140ms ease, color 140ms ease;
 }
-.nav-btn:hover { background: rgba(255, 255, 255, 0.14); color: #fff; }
-.nav-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.nav-btn:hover { background: rgba(255, 255, 255, 0.18); }
+.nav-btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 .nav-btn[aria-current="page"] { background: var(--superficie); color: var(--institucional); }
+.nav-btn[aria-current="page"]:hover { background: var(--superficie-2); }
 
 .barra-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); margin-left: auto; }
 .barra-dato { font-size: 12.5px; color: rgba(255, 255, 255, 0.78); white-space: nowrap; }
