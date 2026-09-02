@@ -494,16 +494,28 @@ select.control { cursor: pointer; }
    momento posible, que es cuando hay alguien del otro lado del
    mostrador mirando la pantalla.
    ============================================================ */
+/* Todo el estado vive en la clase .visible. Alternar el atributo hidden con un
+   temporizador para esperar la transición dejaba una carrera: si se reinvocaba
+   justo en esa ventana, la capa quedaba abierta con opacidad 0, invisible pero
+   tapando la pantalla. visibility difiere su cambio hasta que termina el
+   desvanecido, y pointer-events evita que estorbe mientras está apagada. */
 .giampi {
   position: fixed; inset: 0; z-index: 999;
   display: grid; place-items: center;
   padding: var(--sp-5);
   background: rgba(18, 12, 14, 0.84);
   opacity: 0;
-  transition: opacity 260ms ease;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 260ms ease, visibility 0s linear 260ms;
   cursor: pointer;
 }
-.giampi.visible { opacity: 1; }
+.giampi.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 260ms ease, visibility 0s;
+}
 .giampi-foto {
   width: min(76vw, 72vh);
   max-width: 600px;
@@ -830,7 +842,7 @@ select.control { cursor: pointer; }
 <!-- ============================================================
      GIAMPI
      ============================================================ -->
-<div class="giampi" id="giampi" hidden aria-hidden="true">
+<div class="giampi" id="giampi" aria-hidden="true">
   <img class="giampi-foto" id="giampi-foto" src="giampi.jpg" alt="">
 </div>
 
@@ -2055,16 +2067,16 @@ function invocarGiampi() {
   if (!dom.giampiFoto.complete || dom.giampiFoto.naturalWidth === 0) return;
 
   clearTimeout(giampiTemporizador);
-  dom.giampi.hidden = false;
-  requestAnimationFrame(() => dom.giampi.classList.add('visible'));
+  dom.giampi.classList.add('visible');
   giampiTemporizador = setTimeout(despedirGiampi, GIAMPI_MS);
 }
 
 function despedirGiampi() {
   clearTimeout(giampiTemporizador);
   dom.giampi.classList.remove('visible');
-  setTimeout(() => { dom.giampi.hidden = true; }, 320);
 }
+
+const giampiAbierta = () => dom.giampi.classList.contains('visible');
 
 /* ============================================================
    EXPORTAR CARPETAS
@@ -2500,7 +2512,7 @@ for (const selector of [dom.fMotivo, dom.fFecha, dom.fEstado]) selector.addEvent
 
 dom.giampi.addEventListener('click', despedirGiampi);
 document.addEventListener('keydown', (evento) => {
-  if (evento.key === 'Escape' && !dom.giampi.hidden) despedirGiampi();
+  if (evento.key === 'Escape' && giampiAbierta()) despedirGiampi();
 });
 dom.limpiarFiltros.addEventListener('click', () => { limpiarFiltros(); pintarTabla(); });
 
