@@ -13,31 +13,99 @@ Vercel: <https://pio-t9ma.vercel.app>
 
 ## Acceso
 
-| Usuario | Contraseña | Rol | Qué puede hacer |
-|---|---|---|---|
-| `ingreso` | `UADE2026` | Operador | Cargar y consultar fichas |
-| `aromero` | `lordalan` | Admin | Todo lo anterior + configuración y borrado |
-| `scamarata` | `lordalan` | Admin | Todo lo anterior + configuración y borrado |
+| Usuario | Rol | Qué puede hacer |
+|---|---|---|
+| `ingreso` | Operador | Cargar y consultar fichas |
+| `aromero` | Admin | Todo lo anterior + configuración y borrado de fichas |
+| `scamarata` | Admin | Ídem |
+| `gcanales` | Admin | Ídem |
 
 El nombre de usuario no distingue mayúsculas de minúsculas; la contraseña sí,
-exacta. La sesión vive en `sessionStorage`: se cierra al cerrar el navegador.
-En un equipo compartido conviene usar **Salir** al terminar.
+exacta. La sesión vive en `sessionStorage` y caduca sola: a las **8 horas** de
+abierta y a los **30 minutos** sin actividad. Cinco intentos fallidos bloquean
+el ingreso por 30 segundos.
 
-> ### Esto no es seguridad, es separación de roles
->
-> Las contraseñas están escritas en `index.html` y se verifican en el navegador.
-> Cualquiera que abra el archivo con un editor de texto, o que use el inspector
-> del navegador, las ve y puede saltear la pantalla de ingreso. **No hay forma de
-> evitarlo sin un servidor.**
->
-> Sirve para que un operador no toque la configuración por error y para dejar
-> registrado quién emitió cada ficha. No sirve para impedir el acceso de alguien
-> que quiera entrar. Hasta que esté Supabase Auth —que valida contra el servidor
-> y refuerza los permisos con RLS en Postgres— no guardes en esta aplicación
-> nada cuya fuga sea un problema.
+### Cambiar o agregar un usuario
 
-Para cambiar las credenciales, editá el arreglo `USUARIOS` al principio del
-bloque `<script>` de `index.html`.
+Las contraseñas no están en el código. Para generar las de un usuario nuevo,
+abrí la aplicación, abrí la consola del navegador y pegá:
+
+```js
+const hex = (b) => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2,'0')).join('');
+const salt = hex(crypto.getRandomValues(new Uint8Array(16)));
+console.log(salt, await derivarClave('LA-CONTRASEÑA', salt));
+```
+
+Copiá los dos valores al arreglo `USUARIOS` de `index.html`. Cada usuario lleva
+su propio salt: dos personas con la misma contraseña tienen hashes distintos.
+
+## Seguridad
+
+### Qué protege hoy
+
+| Medida | Contra qué |
+|---|---|
+| PBKDF2-HMAC-SHA256, 210.000 iteraciones, salt de 128 bits por usuario | Leer la contraseña abriendo el HTML, y recuperarla con un diccionario |
+| Derivación también para usuarios inexistentes | Que la demora de respuesta delate qué usuarios existen |
+| Mensaje de error único | Que el texto delate si falló el usuario o la contraseña |
+| Caducidad por jornada e inactividad | El equipo de mostrador que queda abierto |
+| Bloqueo tras 5 intentos | Alguien probando contraseñas a mano |
+| CSP, HSTS, `nosniff`, `frame-ancestors 'none'`, `Referrer-Policy`, `Permissions-Policy`, COOP | XSS, clickjacking, downgrade a HTTP, fuga de referer |
+| Versión fija + Subresource Integrity en las tres librerías de CDN | Un CDN comprometido inyectando código con acceso a la base |
+| Todo el DOM se escribe con `textContent` | XSS a través de un nombre de alumno o de archivo |
+
+> **Nota sobre la CSP.** Todo el JavaScript está en un `<script>` en línea, así
+> que la política necesita `'unsafe-inline'` en `script-src` y eso le saca buena
+> parte del valor contra XSS. Quitarlo requiere mover el script a un archivo
+> aparte, o un nonce por respuesta —que necesita servidor—. El resto de la
+> política sí está apretada: `default-src 'none'` y una lista blanca corta.
+
+### Qué NO protege, y hay que saberlo
+
+> **La pantalla de ingreso es una separación de roles, no un control de acceso.**
+>
+> Dos motivos, y el segundo es el grave:
+>
+> 1. La comprobación corre en el navegador. Con la consola abierta, cualquiera
+>    saltea el login. El hash no lo evita: solo evita leer la contraseña.
+> 2. **La clave anónima de Supabase está en el HTML y las políticas RLS son
+>    permisivas para el rol `anon`.** Quien tenga la URL de la aplicación puede
+>    leer, escribir y borrar todas las fichas atacando la API REST de Supabase
+>    directamente, sin pasar nunca por la pantalla de ingreso.
+>
+> Hasta que eso se cierre, no cargues en esta aplicación nada cuya filtración
+> sea un problema serio.
+
+### Cómo se cierra
+
+Supabase Auth con políticas RLS atadas a `auth.uid()`. En orden:
+
+1. Crear los usuarios en **Authentication → Users** del panel de Supabase.
+2. Una tabla `perfiles` (`id uuid` que referencia `auth.users`, más `rol` y
+   `nombre`) para saber quién es admin.
+3. Reemplazar `autenticar()` por `supa.auth.signInWithPassword()`. El arreglo
+   `USUARIOS`, los hashes y la caducidad de sesión salen del código: los maneja
+   Supabase.
+4. Cambiar las políticas de `TO anon` a `TO authenticated`, y las de borrado a
+   que exijan rol admin:
+
+   ```sql
+   REVOKE ALL ON public.fichas FROM anon;
+   DROP POLICY "pio_anon_fichas" ON public.fichas;
+
+   CREATE POLICY "fichas_lectura" ON public.fichas
+     FOR SELECT TO authenticated USING (true);
+
+   CREATE POLICY "fichas_alta" ON public.fichas
+     FOR INSERT TO authenticated WITH CHECK (true);
+
+   CREATE POLICY "fichas_borrado_admin" ON public.fichas
+     FOR DELETE TO authenticated
+     USING (EXISTS (SELECT 1 FROM public.perfiles p
+                    WHERE p.id = auth.uid() AND p.rol = 'admin'));
+   ```
+
+Recién ahí el rol admin es un permiso real y no una casilla del navegador.
 
 ## Cómo se usa
 
@@ -181,7 +249,7 @@ todas las llamadas fallan con 401. La `service_role` **nunca** va en el HTML.
 | `padron.js` | Padrón embebido, generado. No editar a mano |
 | `build_padron.py` | Regenera `padron.js` desde un Excel |
 | `supabase_setup.sql` | Migración inicial de la base. Correr una sola vez |
-| `vercel.json` | Le dice a Vercel que es un sitio estático sin build |
+| `vercel.json` | Sitio estático sin build, y las cabeceras de seguridad |
 
 ## Verificación
 
@@ -242,8 +310,9 @@ creada tiene que verse sí o sí al volver al listado.
 
 ## Qué falta para la versión completa
 
-- Autenticación real con Supabase Auth y permisos reforzados con RLS en Postgres
-  (hoy las políticas son permisivas para el rol anónimo)
+- **Supabase Auth con RLS atada a `auth.uid()`** — lo único que convierte la
+  separación de roles en un control de acceso real. Ver *Cómo se cierra* arriba
+- Mover el JavaScript a un archivo aparte para sacar `'unsafe-inline'` de la CSP
 - Alta y baja de usuarios desde el panel, en vez de editar el arreglo `USUARIOS`
 - Numeración correlativa de fichas
 - Padrón compartido en Supabase, en vez de local a cada navegador
