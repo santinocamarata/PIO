@@ -834,7 +834,13 @@ select.control { cursor: pointer; }
   </p>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<!-- Version fija + integrity: con el tag flotante @2 el CDN podia servir una
+     version distinta cada dia, y un CDN comprometido habria inyectado codigo
+     con acceso completo a la base. El navegador ahora verifica el hash y, si
+     no coincide, no ejecuta el archivo. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.113.0/dist/umd/supabase.js"
+        integrity="sha384-6RfftBe0Rakn679H2xsb03EtYfeYGfNLCmLKWQCR71Xg7Z/hDhZc2N2ZIuJwREJX"
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="padron.js"></script>
 <script>
 'use strict';
@@ -842,27 +848,66 @@ select.control { cursor: pointer; }
 /* ============================================================
    USUARIOS
 
-   ATENCIÓN: estas credenciales están escritas en este archivo y
-   se comprueban en el navegador. Cualquiera que abra el HTML con
-   un editor de texto, o que use el inspector, las ve y puede
-   saltear la pantalla de ingreso. No protegen contra alguien que
-   quiera entrar: sirven para separar roles entre compañeros de
-   oficina y evitar que un operador toque la configuración por
-   error.
+   Las contraseñas NO están en este archivo: lo que se guarda es
+   un PBKDF2-HMAC-SHA256 de 210.000 iteraciones con un salt
+   distinto por usuario. Eso impide leer la contraseña abriendo el
+   HTML, y encarece recuperarla con un diccionario. Importa porque
+   estas contraseñas se repiten en otros lados: que se filtre el
+   acceso a esta aplicación es un problema, que se filtre una
+   contraseña que alguien reusa en su correo es otro mucho peor.
 
-   La autenticación real llega con Supabase Auth, que valida
-   contra el servidor y refuerza los permisos con RLS en Postgres.
-   Hasta entonces, no guardar en esta aplicación nada cuya fuga
-   sea un problema.
+   ATENCIÓN, y esto el hash NO lo arregla: la comprobación corre
+   en el navegador. Cualquiera con la consola abierta puede
+   saltear esta pantalla, y la clave anónima de Supabase que está
+   más abajo permite leer y escribir la base sin pasar por acá.
+   La separación de roles es real frente a un compañero de
+   oficina; no lo es frente a alguien que quiera entrar.
+
+   El cierre de ese agujero es Supabase Auth con políticas RLS
+   atadas a auth.uid(). Está anotado en el README.
+
+   Para cambiar o agregar un usuario, generá salt y hash con la
+   consola del navegador:
+
+     const hex = (b) => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2,'0')).join('');
+     const salt = hex(crypto.getRandomValues(new Uint8Array(16)));
+     console.log(salt, await derivarClave('LA-CLAVE', salt));
 
    El usuario no distingue mayúsculas de minúsculas; la
    contraseña sí, exacta.
    ============================================================ */
 const USUARIOS = [
-  { usuario: 'ingreso',   clave: 'UADE2026', rol: 'operador', nombre: 'Mesa de entrada' },
-  { usuario: 'aromero',   clave: 'lordalan', rol: 'admin',    nombre: 'Romero' },
-  { usuario: 'scamarata', clave: 'lordalan', rol: 'admin',    nombre: 'Camarata' }
+  { usuario: 'ingreso',   rol: 'operador', nombre: 'Mesa de entrada',
+    salt: '7c69f2f1399607a21acb923e25897dc8',
+    hash: 'db1978aca666a677c407b93a10a7de6a2fc104bb6b6f28779dbedd200557752d' },
+  { usuario: 'aromero',   rol: 'admin',    nombre: 'Romero',
+    salt: '55ef8e46f49191c4f84a72a14aac23eb',
+    hash: '1fcfd5a36e9e55ce2ffb12dc3cd2cf53897815670ced5eba78a5cf7e64f05a56' },
+  { usuario: 'scamarata', rol: 'admin',    nombre: 'Camarata',
+    salt: 'f3011b476941a3059de6001505dca347',
+    hash: 'c841c954e70eea1307ba93a20059422b5824602753ee4b0bb59fe510a7f5d60e' },
+  { usuario: 'gcanales',  rol: 'admin',    nombre: 'Canales',
+    salt: 'dacfa43b380418c924b620bb35b73c41',
+    hash: 'eaa268ac25687d189812febdc034f4e15b4dbaad7e36c1f0d334f1dfe2e8657f' }
 ];
+
+/* Parámetros de derivación. 210.000 iteraciones es la recomendación de OWASP
+   para PBKDF2-HMAC-SHA256; cuesta unos 100 ms por intento en un equipo de
+   mostrador, que no se nota al ingresar y sí encarece probar un diccionario. */
+const PBKDF2_ITERACIONES = 210000;
+const PBKDF2_BITS = 256;
+
+/* Ventanas de sesión. La aplicación corre en equipos compartidos de mesa de
+   entrada: si alguien se levanta sin cerrar sesión, la sesión tiene que
+   caducar sola. */
+const SESION_MAX_MS        = 8 * 60 * 60 * 1000;  // una jornada completa
+const SESION_INACTIVIDAD_MS = 30 * 60 * 1000;     // media hora sin tocar nada
+
+/* Freno a la prueba de contraseñas a mano. Vive en memoria, así que recargar
+   la página lo reinicia: sirve contra alguien tecleando en el mostrador, no
+   contra un script. */
+const INTENTOS_MAX = 5;
+const BLOQUEO_MS = 30 * 1000;
 
 /** Qué puede hacer cada rol. El operador solo carga y consulta fichas. */
 const PERMISOS = {
@@ -896,11 +941,44 @@ const SEMILLA = {
    Funciones puras, sin DOM. Viajan tal cual a Next.js/Supabase.
    ============================================================ */
 
+const bytesAHex = (buffer) =>
+  [...new Uint8Array(buffer)].map((b) => b.toString(16).padStart(2, '0')).join('');
+
+const hexABytes = (hex) =>
+  new Uint8Array((String(hex).match(/../g) || []).map((par) => parseInt(par, 16)));
+
+/** PBKDF2-HMAC-SHA256 de la contraseña con el salt del usuario. Devuelve hex. */
+async function derivarClave(clave, saltHex) {
+  const material = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(String(clave)), 'PBKDF2', false, ['deriveBits']
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: hexABytes(saltHex), iterations: PBKDF2_ITERACIONES, hash: 'SHA-256' },
+    material, PBKDF2_BITS
+  );
+  return bytesAHex(bits);
+}
+
 /**
- * Comprueba usuario y contraseña.
- * @returns {{ok:true, sesion:object} | {ok:false, mensaje:string}}
+ * Compara dos hex sin cortar apenas encuentra una diferencia.
+ * Acá el atacante ya tiene el hash a la vista, así que no hay un ataque de
+ * tiempo real que evitar; se hace igual porque comparar secretos así es lo
+ * correcto y no cuesta nada.
  */
-function autenticar(usuarioCrudo, claveCruda, usuarios) {
+function igualesEnTiempoConstante(a, b) {
+  const x = String(a);
+  const y = String(b);
+  if (x.length !== y.length) return false;
+  let diferencia = 0;
+  for (let i = 0; i < x.length; i++) diferencia |= x.charCodeAt(i) ^ y.charCodeAt(i);
+  return diferencia === 0;
+}
+
+/**
+ * Comprueba usuario y contraseña contra el hash guardado.
+ * @returns {Promise<{ok:true, sesion:object} | {ok:false, mensaje:string}>}
+ */
+async function autenticar(usuarioCrudo, claveCruda, usuarios) {
   const usuario = String(usuarioCrudo || '').trim().toLowerCase();
   const clave = String(claveCruda || '');
 
@@ -908,8 +986,15 @@ function autenticar(usuarioCrudo, claveCruda, usuarios) {
     return { ok: false, mensaje: 'Completá usuario y contraseña.' };
   }
 
-  const encontrado = usuarios.find((u) => u.usuario.toLowerCase() === usuario && u.clave === clave);
-  if (!encontrado) {
+  const encontrado = usuarios.find((u) => u.usuario.toLowerCase() === usuario);
+
+  /* Si el usuario no existe se deriva igual contra un salt de descarte. Sin
+     eso, un usuario inexistente respondería al instante y uno real tardaría
+     los 100 ms de la derivación: la demora sola delataría qué usuarios hay. */
+  const salt = encontrado ? encontrado.salt : '00000000000000000000000000000000';
+  const derivado = await derivarClave(clave, salt);
+
+  if (!encontrado || !igualesEnTiempoConstante(derivado, encontrado.hash)) {
     // Mismo mensaje para usuario inexistente y contraseña incorrecta:
     // decir cuál de los dos falló revela qué usuarios existen.
     return { ok: false, mensaje: 'Usuario o contraseña incorrectos.' };
@@ -1327,8 +1412,41 @@ function avisar(nodo, texto, tipo) {
    SESIÓN
    ============================================================ */
 
+/**
+ * ¿La sesión guardada sigue vigente? Caduca por jornada y por inactividad.
+ * Se comprueba al arrancar y cada minuto mientras la aplicación está abierta.
+ */
+function sesionVigente(sesion, ahora) {
+  if (!sesion || !sesion.rol || !PERMISOS[sesion.rol]) return false;
+  if (typeof sesion.emitida !== 'number' || typeof sesion.ultimoUso !== 'number') return false;
+  if (ahora - sesion.emitida   > SESION_MAX_MS) return false;
+  if (ahora - sesion.ultimoUso > SESION_INACTIVIDAD_MS) return false;
+  return true;
+}
+
+/** Marca actividad para correr el reloj de inactividad. */
+function tocarSesion() {
+  if (!estado.sesion) return;
+  estado.sesion.ultimoUso = Date.now();
+  escribirJson(sessionStorage, CLAVE_SESION, estado.sesion);
+}
+
+function vigilarCaducidad() {
+  if (!estado.sesion) return;
+  if (sesionVigente(estado.sesion, Date.now())) return;
+  cerrarSesion();
+  dom.accesoError.textContent = 'La sesión caducó por inactividad. Volvé a ingresar.';
+  dom.accesoError.hidden = false;
+}
+
 async function iniciarSesion(sesion) {
-  estado.sesion = sesion;
+  const ahora = Date.now();
+  estado.sesion = {
+    usuario: sesion.usuario, rol: sesion.rol, nombre: sesion.nombre,
+    emitida: sesion.emitida || ahora,
+    ultimoUso: ahora
+  };
+  sesion = estado.sesion;
   escribirJson(sessionStorage, CLAVE_SESION, sesion);
   dom.pantallaAcceso.hidden = true;
   dom.pantallaApp.hidden = false;
@@ -1876,13 +1994,10 @@ function exportarCsv() {
 
 function cargarJsZip() {
   if (window.JSZip) return Promise.resolve(window.JSZip);
-  return new Promise((resolver, rechazar) => {
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-    script.onload = () => window.JSZip ? resolver(window.JSZip) : rechazar(new Error('sin JSZip'));
-    script.onerror = () => rechazar(new Error('sin red'));
-    document.head.append(script);
-  });
+  return cargarLibreria(
+    'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+    'sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG'
+  ).then(() => window.JSZip || Promise.reject(new Error('sin JSZip')));
 }
 
 async function exportarCarpetas() {
@@ -2110,15 +2225,29 @@ function filasDeDatos(filas) {
   return filas.slice(desde).map((f) => [f[iLegajo], f[iAlumno]]);
 }
 
-function cargarSheetJs() {
-  if (window.XLSX) return Promise.resolve(window.XLSX);
+/**
+ * Carga una librería del CDN verificando su hash. Si el archivo servido no
+ * coincide con `integridad`, el navegador lo descarta y dispara onerror.
+ */
+function cargarLibreria(url, integridad) {
   return new Promise((resolver, rechazar) => {
     const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-    script.onload = () => window.XLSX ? resolver(window.XLSX) : rechazar(new Error('sin XLSX'));
+    script.src = url;
+    script.integrity = integridad;
+    script.crossOrigin = 'anonymous';
+    script.referrerPolicy = 'no-referrer';
+    script.onload = resolver;
     script.onerror = () => rechazar(new Error('sin red'));
     document.head.append(script);
   });
+}
+
+function cargarSheetJs() {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return cargarLibreria(
+    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+    'sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw'
+  ).then(() => window.XLSX || Promise.reject(new Error('sin XLSX')));
 }
 
 async function leerFilasDelArchivo(archivo) {
@@ -2164,17 +2293,48 @@ async function actualizarPadron(archivo) {
    EVENTOS
    ============================================================ */
 
+const acceso = { fallidos: 0, bloqueadoHasta: 0 };
+
 dom.formAcceso.addEventListener('submit', async (evento) => {
   evento.preventDefault();
-  const resultado = autenticar(dom.usuario.value, dom.clave.value, USUARIOS);
-  if (!resultado.ok) {
-    dom.accesoError.textContent = resultado.mensaje;
+
+  const restante = acceso.bloqueadoHasta - Date.now();
+  if (restante > 0) {
+    dom.accesoError.textContent = 'Demasiados intentos. Esperá ' + Math.ceil(restante / 1000) + ' segundos.';
     dom.accesoError.hidden = false;
-    dom.clave.value = '';
-    dom.clave.focus();
     return;
   }
-  await iniciarSesion(resultado.sesion);
+
+  const boton = dom.formAcceso.querySelector('button[type="submit"]');
+  boton.disabled = true;
+  boton.textContent = 'Verificando…';
+
+  try {
+    const resultado = await autenticar(dom.usuario.value, dom.clave.value, USUARIOS);
+
+    if (!resultado.ok) {
+      acceso.fallidos++;
+      if (acceso.fallidos >= INTENTOS_MAX) {
+        acceso.bloqueadoHasta = Date.now() + BLOQUEO_MS;
+        acceso.fallidos = 0;
+        dom.accesoError.textContent = 'Demasiados intentos. Esperá ' + (BLOQUEO_MS / 1000) + ' segundos.';
+      } else {
+        dom.accesoError.textContent = resultado.mensaje;
+      }
+      dom.accesoError.hidden = false;
+      dom.clave.value = '';
+      dom.clave.focus();
+      return;
+    }
+
+    acceso.fallidos = 0;
+    await iniciarSesion(resultado.sesion);
+  } finally {
+    boton.disabled = false;
+    boton.textContent = 'Ingresar';
+    // La contraseña no se queda en el DOM después de usarse.
+    dom.clave.value = '';
+  }
 });
 
 dom.salir.addEventListener('click', cerrarSesion);
@@ -2261,35 +2421,83 @@ recuperarPadronGuardado();
 refrescarPadron();
 
 const sesionGuardada = leerJson(sessionStorage, CLAVE_SESION, null);
-if (sesionGuardada && sesionGuardada.rol && PERMISOS[sesionGuardada.rol]) {
+if (sesionVigente(sesionGuardada, Date.now())) {
   iniciarSesion(sesionGuardada);
 } else {
+  try { sessionStorage.removeItem(CLAVE_SESION); } catch { /* almacenamiento bloqueado */ }
   dom.usuario.focus();
+}
+
+// Reloj de caducidad y marca de actividad.
+setInterval(vigilarCaducidad, 60 * 1000);
+for (const evento of ['click', 'keydown']) {
+  document.addEventListener(evento, tocarSesion, { passive: true });
 }
 
 /* ============================================================
    AUTOCOMPROBACIÓN
    Abrir con ?test en la URL y mirar la consola.
    ============================================================ */
-if (location.search.includes('test')) {
+if (location.search.includes('test')) (async () => {
   const padronPrueba = { '1251113': 'Lovera Roja, Daniel' };
   const iguales = (a, b, caso) => {
     if (a !== b) throw new Error(caso + ' — esperado ' + JSON.stringify(b) + ', obtenido ' + JSON.stringify(a));
   };
 
+  // Derivación de contraseñas
+  const saltPrueba = '000102030405060708090a0b0c0d0e0f';
+  const d1 = await derivarClave('secreta', saltPrueba);
+  const d2 = await derivarClave('secreta', saltPrueba);
+  const d3 = await derivarClave('secreta', 'ffeeddccbbaa99887766554433221100');
+  const d4 = await derivarClave('Secreta', saltPrueba);
+  iguales(d1, d2, 'la derivación es determinística');
+  iguales(d1.length, 64, 'la derivación devuelve 256 bits en hex');
+  iguales(d1 === d3, false, 'distinto salt, distinto hash');
+  iguales(d1 === d4, false, 'la derivación distingue mayúsculas');
+  iguales(bytesAHex(hexABytes('00ff10')), '00ff10', 'hex ida y vuelta');
+
+  iguales(igualesEnTiempoConstante('abc', 'abc'), true, 'compara iguales');
+  iguales(igualesEnTiempoConstante('abc', 'abd'), false, 'compara distintos');
+  iguales(igualesEnTiempoConstante('abc', 'abcd'), false, 'distinta longitud');
+
+  // Ningún usuario guarda la contraseña en claro
+  for (const u of USUARIOS) {
+    iguales('clave' in u, false, 'el usuario ' + u.usuario + ' no guarda la contraseña');
+    iguales(u.hash.length, 64, 'el hash de ' + u.usuario + ' mide 256 bits');
+    iguales(u.salt.length, 32, 'el salt de ' + u.usuario + ' mide 128 bits');
+  }
+  iguales(new Set(USUARIOS.map((u) => u.salt)).size, USUARIOS.length, 'cada usuario tiene su propio salt');
+  // aromero y scamarata comparten contraseña: con salts distintos, los hashes difieren.
+  iguales(new Set(USUARIOS.map((u) => u.hash)).size, USUARIOS.length, 'contraseñas repetidas no dan hashes repetidos');
+
   // Acceso
-  iguales(autenticar('ingreso', 'UADE2026', USUARIOS).ok, true, 'operador ingresa');
-  iguales(autenticar('ingreso', 'UADE2026', USUARIOS).sesion.rol, 'operador', 'rol del operador');
-  iguales(autenticar('INGRESO', 'UADE2026', USUARIOS).ok, true, 'usuario sin distinguir mayúsculas');
-  iguales(autenticar('  ingreso  ', 'UADE2026', USUARIOS).ok, true, 'usuario con espacios');
-  iguales(autenticar('ingreso', 'uade2026', USUARIOS).ok, false, 'contraseña distingue mayúsculas');
-  iguales(autenticar('aromero', 'lordalan', USUARIOS).sesion.rol, 'admin', 'rol del admin');
-  iguales(autenticar('AROMERO', 'lordalan', USUARIOS).ok, true, 'admin sin distinguir mayúsculas');
-  iguales(autenticar('aromero', 'LORDALAN', USUARIOS).ok, false, 'contraseña del admin exacta');
-  iguales(autenticar('otro', 'x', USUARIOS).ok, false, 'usuario inexistente');
-  iguales(autenticar('', '', USUARIOS).mensaje, 'Completá usuario y contraseña.', 'campos vacíos');
-  iguales(autenticar('ingreso', 'mal', USUARIOS).mensaje,
-          autenticar('nadie', 'mal', USUARIOS).mensaje, 'el error no revela qué usuarios existen');
+  iguales((await autenticar('ingreso', 'UADE2026', USUARIOS)).ok, true, 'operador ingresa');
+  iguales((await autenticar('ingreso', 'UADE2026', USUARIOS)).sesion.rol, 'operador', 'rol del operador');
+  iguales((await autenticar('INGRESO', 'UADE2026', USUARIOS)).ok, true, 'usuario sin distinguir mayúsculas');
+  iguales((await autenticar('  ingreso  ', 'UADE2026', USUARIOS)).ok, true, 'usuario con espacios');
+  iguales((await autenticar('ingreso', 'uade2026', USUARIOS)).ok, false, 'contraseña distingue mayúsculas');
+  iguales((await autenticar('aromero', 'lordalan', USUARIOS)).sesion.rol, 'admin', 'rol del admin');
+  iguales((await autenticar('AROMERO', 'lordalan', USUARIOS)).ok, true, 'admin sin distinguir mayúsculas');
+  iguales((await autenticar('aromero', 'LORDALAN', USUARIOS)).ok, false, 'contraseña del admin exacta');
+  iguales((await autenticar('scamarata', 'lordalan', USUARIOS)).sesion.nombre, 'Camarata', 'scamarata ingresa');
+  iguales((await autenticar('gcanales', 'UADE2026', USUARIOS)).sesion.rol, 'admin', 'gcanales es admin');
+  iguales((await autenticar('gcanales', 'lordalan', USUARIOS)).ok, false, 'gcanales no entra con otra contraseña');
+  iguales((await autenticar('otro', 'x', USUARIOS)).ok, false, 'usuario inexistente');
+  iguales((await autenticar('', '', USUARIOS)).mensaje, 'Completá usuario y contraseña.', 'campos vacíos');
+  iguales((await autenticar('ingreso', 'mal', USUARIOS)).mensaje,
+          (await autenticar('nadie', 'mal', USUARIOS)).mensaje, 'el error no revela qué usuarios existen');
+
+  // Caducidad de sesión
+  const ahora = 1_700_000_000_000;
+  const viva = { rol: 'admin', emitida: ahora, ultimoUso: ahora };
+  iguales(sesionVigente(viva, ahora), true, 'sesión recién abierta');
+  iguales(sesionVigente(viva, ahora + SESION_INACTIVIDAD_MS - 1), true, 'antes del límite de inactividad');
+  iguales(sesionVigente(viva, ahora + SESION_INACTIVIDAD_MS + 1), false, 'caduca por inactividad');
+  iguales(sesionVigente({ rol: 'admin', emitida: ahora, ultimoUso: ahora + SESION_MAX_MS },
+                        ahora + SESION_MAX_MS + 1), false, 'caduca por jornada aunque haya actividad');
+  iguales(sesionVigente({ rol: 'admin' }, ahora), false, 'sesión sin marcas de tiempo');
+  iguales(sesionVigente({ rol: 'inventado', emitida: ahora, ultimoUso: ahora }, ahora), false, 'rol desconocido');
+  iguales(sesionVigente(null, ahora), false, 'sin sesión');
 
   // Permisos
   const sesionOperador = { usuario: 'ingreso', rol: 'operador', nombre: 'Mesa de entrada' };
@@ -2451,7 +2659,10 @@ if (location.search.includes('test')) {
   iguales(exportado[2].includes('Sin adjunto'), true, 'fila CSV sin adjunto');
 
   console.log('%c✓ Autocomprobación completa: todo en orden', 'color:#16704a;font-weight:700');
-}
+})().catch((error) => {
+  console.error('%c✗ Autocomprobación fallida', 'color:#b8481f;font-weight:700', error);
+  throw error;
+});
 </script>
 </body>
 </html>
