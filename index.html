@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fichas de excepción · Examen de Ingreso</title>
+<title>PIO · Fichas de excepción</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=JetBrains+Mono:wght@500;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,22 +14,26 @@
    mostrador se quedan con el hex, el resto usa espacio perceptual.
    ============================================================ */
 :root {
-  --fondo:         #f2f3f5;  --fondo:         oklch(0.958 0.003 250);
+  --fondo:         #f6f3f0;  --fondo:         oklch(0.962 0.005 62);
   --superficie:    #ffffff;  --superficie:    oklch(1 0 0);
-  --superficie-2:  #f8f9fa;  --superficie-2:  oklch(0.978 0.002 250);
-  --tinta:         #171b22;  --tinta:         oklch(0.20 0.012 255);
-  --tinta-suave:   #5f6672;  --tinta-suave:   oklch(0.475 0.012 255);
-  --tinta-tenue:   #8d939d;  --tinta-tenue:   oklch(0.635 0.010 255);
-  --institucional: #1f3d73;  --institucional: oklch(0.345 0.095 258);
-  --institucional-2:#2d5296; --institucional-2:oklch(0.425 0.110 258);
+  --superficie-2:  #faf7f5;  --superficie-2:  oklch(0.979 0.004 62);
+  --tinta:         #251a1d;  --tinta:         oklch(0.215 0.014 14);
+  --tinta-suave:   #6c5c5f;  --tinta-suave:   oklch(0.478 0.014 14);
+  --tinta-tenue:   #9b8d8f;  --tinta-tenue:   oklch(0.638 0.010 14);
+  --institucional: #7b2d3b;  --institucional: oklch(0.378 0.105 12);
+  --institucional-2:#8f3648; --institucional-2:oklch(0.435 0.113 12);
+  --institucional-3:#6a2432; --institucional-3:oklch(0.330 0.098 12);
+  --institucional-tenue:#f4e8ea; --institucional-tenue:oklch(0.943 0.015 12);
   --valido:        #16704a;  --valido:        oklch(0.485 0.110 158);
   --valido-fondo:  #e9f4ee;  --valido-fondo:  oklch(0.955 0.022 158);
-  --error:         #b3352a;  --error:         oklch(0.485 0.170 27);
-  --error-fondo:   #fbeeec;  --error-fondo:   oklch(0.960 0.018 27);
+  /* El error va francamente anaranjado: con la marca en borgoña, un rojo
+     puro se confundiría con el color institucional. */
+  --error:         #b8481f;  --error:         oklch(0.520 0.155 44);
+  --error-fondo:   #fcefe8;  --error-fondo:   oklch(0.960 0.020 44);
   --espera:        #8a5a08;  --espera:        oklch(0.505 0.105 75);
-  --borde:         #d9dce1;  --borde:         oklch(0.878 0.005 255);
-  --regla:         #e6e8ec;  --regla:         oklch(0.925 0.004 255);
-  --campo:         #f6f7f8;  --campo:         oklch(0.972 0.002 255);
+  --borde:         #e1d9d7;  --borde:         oklch(0.882 0.006 40);
+  --regla:         #ece5e3;  --regla:         oklch(0.926 0.005 40);
+  --campo:         #f9f6f5;  --campo:         oklch(0.974 0.003 40);
 
   --serif: 'EB Garamond', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
   --sans:  'Source Sans 3', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -129,6 +133,20 @@ body {
   font-size: 12px; font-weight: 600; letter-spacing: 0.1em;
   text-transform: uppercase; color: rgba(255, 255, 255, 0.72); white-space: nowrap;
 }
+/* Navegación entre las dos vistas: listado y alta. */
+.barra-nav { display: flex; gap: var(--sp-1); }
+.nav-btn {
+  min-height: 38px; padding: 0 var(--sp-4);
+  border: 1px solid transparent; border-radius: 2px;
+  background: transparent; color: rgba(255, 255, 255, 0.82);
+  font-family: var(--sans); font-size: 14.5px; font-weight: 600;
+  white-space: nowrap; cursor: pointer;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+.nav-btn:hover { background: rgba(255, 255, 255, 0.14); color: #fff; }
+.nav-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.nav-btn[aria-current="page"] { background: var(--superficie); color: var(--institucional); }
+
 .barra-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); margin-left: auto; }
 .barra-dato { font-size: 12.5px; color: rgba(255, 255, 255, 0.78); white-space: nowrap; }
 .barra-dato b {
@@ -166,7 +184,7 @@ body {
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .btn-principal { border-color: var(--institucional-2); background: var(--institucional-2); color: #fff; }
-.btn-principal:hover:not(:disabled) { background: #24447d; border-color: #24447d; }
+.btn-principal:hover:not(:disabled) { background: var(--institucional-3); border-color: var(--institucional-3); }
 
 .btn-ancho { width: 100%; }
 
@@ -190,14 +208,34 @@ body {
 .area-conteo { font-size: 13px; color: var(--tinta-suave); font-variant-numeric: tabular-nums; }
 .area-herramientas { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-left: auto; }
 
-.buscador {
-  min-height: 44px; min-width: 240px; padding: 0 var(--sp-3);
-  border: 1px solid var(--borde); border-radius: 2px;
-  background: var(--superficie); color: var(--tinta);
-  font-family: var(--sans); font-size: 14.5px;
+/* ============================================================
+   FILTROS DEL LISTADO
+   ============================================================ */
+.filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  align-items: end;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+  padding: var(--sp-4);
+  border: 1px solid var(--borde);
+  background: var(--superficie);
 }
-.buscador:focus-visible { outline: 2px solid var(--institucional-2); outline-offset: -1px; border-color: var(--institucional-2); }
-.buscador::placeholder { color: var(--tinta-tenue); }
+.filtro { min-width: 0; }
+.filtro .rotulo { margin-bottom: 6px; }
+.filtro .control { min-height: 40px; font-size: 14.5px; }
+.filtros-acciones { display: flex; align-items: end; }
+.filtros-acciones .btn { min-height: 40px; width: 100%; }
+
+/* ============================================================
+   VISTAS
+   ============================================================ */
+.panel-form { padding: var(--sp-5); }
+.form-pie {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3);
+  margin-top: var(--sp-5); padding-top: var(--sp-5);
+  border-top: 1px solid var(--regla);
+}
 
 /* ============================================================
    TABLA DE FICHAS
@@ -428,9 +466,12 @@ select.control { cursor: pointer; }
 @media (max-width: 640px) {
   .area { padding: var(--sp-3); }
   .area-herramientas { margin-left: 0; width: 100%; }
-  .buscador { flex: 1; min-width: 0; }
   .barra-acciones { margin-left: 0; width: 100%; }
   .barra-sesion { padding-left: 0; border-left: none; }
+  .barra-nav { width: 100%; }
+  .nav-btn { flex: 1; }
+  .filtros { grid-template-columns: 1fr 1fr; padding: var(--sp-3); }
+  .panel-form { padding: var(--sp-4); }
   .legajo-entrada { font-size: 23px; }
 }
 
@@ -518,13 +559,16 @@ select.control { cursor: pointer; }
 
   <header class="barra">
     <div class="barra-identidad">
-      <span class="barra-sigla">Examen de Ingreso</span>
-      <span class="barra-depto">Fichas de excepción</span>
+      <span class="barra-sigla">PIO</span>
+      <span class="barra-depto">Examen de Ingreso</span>
     </div>
+    <nav class="barra-nav" aria-label="Secciones">
+      <button class="nav-btn" id="nav-fichas" type="button" aria-current="page">Fichas</button>
+      <button class="nav-btn" id="nav-nueva" type="button">Nueva ficha</button>
+    </nav>
     <div class="barra-acciones">
       <span class="barra-dato">Padrón · <b id="barra-cantidad">—</b> alumnos</span>
       <button class="btn btn-sobre-barra" id="abrir-config" type="button" hidden>Configuración</button>
-      <button class="btn btn-principal" id="abrir-ficha" type="button">Nueva ficha</button>
       <span class="barra-sesion">
         <span class="insignia" id="sesion-rol">—</span>
         <span id="sesion-nombre">—</span>
@@ -534,104 +578,135 @@ select.control { cursor: pointer; }
   </header>
 
   <main class="area">
-    <div class="area-cabecera">
-      <div>
-        <h1 class="area-titulo">Fichas emitidas</h1>
-        <span class="area-conteo" id="conteo">Sin fichas cargadas</span>
-      </div>
-      <div class="area-herramientas">
-        <label class="sr" for="buscar">Buscar ficha</label>
-        <input class="buscador" id="buscar" type="search" placeholder="Buscar por legajo, alumno o motivo" autocomplete="off">
-        <button class="btn" id="exportar" type="button">Exportar CSV</button>
-      </div>
-    </div>
 
-    <div class="marco">
-      <div class="desplazador">
-        <table class="tabla" id="tabla" hidden>
-          <thead>
-            <tr>
-              <th scope="col">Legajo</th>
-              <th scope="col">Alumno</th>
-              <th scope="col">Motivo</th>
-              <th scope="col">Recuperatorio</th>
-              <th scope="col">Documentación</th>
-              <th scope="col">Ficha N.º</th>
-              <th scope="col"><span class="sr">Acciones</span></th>
-            </tr>
-          </thead>
-          <tbody id="cuerpo-tabla"></tbody>
-        </table>
+    <!-- ---------- VISTA · LISTADO ---------- -->
+    <section id="vista-fichas">
+      <div class="area-cabecera">
+        <div>
+          <h1 class="area-titulo">Fichas de excepción</h1>
+          <span class="area-conteo" id="conteo">Sin fichas cargadas</span>
+        </div>
+        <div class="area-herramientas">
+          <button class="btn" id="exportar" type="button">Exportar CSV</button>
+          <button class="btn btn-principal" id="ir-nueva" type="button">Nueva ficha</button>
+        </div>
       </div>
 
-      <div class="vacio" id="vacio">
-        <p class="vacio-titulo" id="vacio-titulo">Todavía no hay fichas cargadas</p>
-        <p class="vacio-texto" id="vacio-texto">
-          Cada ficha registra a un alumno inscripto que no podrá asistir a la fecha
-          de curso asignada y la fecha de recuperatorio que se le otorga.
-        </p>
-        <button class="btn btn-principal" id="vacio-accion" type="button">Crear la primera ficha</button>
+      <div class="filtros">
+        <div class="filtro">
+          <label class="rotulo" for="f-alumno">Alumno</label>
+          <input class="control" id="f-alumno" type="search" placeholder="Apellido o nombre" autocomplete="off">
+        </div>
+        <div class="filtro">
+          <label class="rotulo" for="f-legajo">Legajo</label>
+          <input class="control" id="f-legajo" type="search" placeholder="Legajo" inputmode="numeric" autocomplete="off">
+        </div>
+        <div class="filtro">
+          <label class="rotulo" for="f-motivo">Motivo</label>
+          <select class="control" id="f-motivo"><option value="">Todos</option></select>
+        </div>
+        <div class="filtro">
+          <label class="rotulo" for="f-fecha">Recuperatorio</label>
+          <select class="control" id="f-fecha"><option value="">Todas</option></select>
+        </div>
+        <div class="filtro">
+          <label class="rotulo" for="f-estado">Estado</label>
+          <select class="control" id="f-estado">
+            <option value="todas">Todas</option>
+            <option value="vigentes">Vigentes</option>
+            <option value="vencidas">Vencidas</option>
+          </select>
+        </div>
+        <div class="filtros-acciones">
+          <button class="btn" id="limpiar-filtros" type="button">Limpiar filtros</button>
+        </div>
       </div>
-    </div>
+
+      <div class="marco">
+        <div class="desplazador">
+          <table class="tabla" id="tabla" hidden>
+            <thead>
+              <tr>
+                <th scope="col">Legajo</th>
+                <th scope="col">Alumno</th>
+                <th scope="col">Motivo</th>
+                <th scope="col">Recuperatorio</th>
+                <th scope="col">Documentación</th>
+                <th scope="col">Ficha N.º</th>
+                <th scope="col"><span class="sr">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody id="cuerpo-tabla"></tbody>
+          </table>
+        </div>
+
+        <div class="vacio" id="vacio">
+          <p class="vacio-titulo" id="vacio-titulo">Todavía no hay fichas cargadas</p>
+          <p class="vacio-texto" id="vacio-texto">
+            Cada ficha registra a un alumno inscripto que no podrá asistir a la fecha
+            de curso asignada y la fecha de recuperatorio que se le otorga.
+          </p>
+          <button class="btn btn-principal" id="vacio-accion" type="button">Crear la primera ficha</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- VISTA · ALTA ---------- -->
+    <section id="vista-nueva" hidden>
+      <div class="area-cabecera">
+        <div>
+          <h1 class="area-titulo">Nueva ficha de excepción</h1>
+          <span class="area-conteo">El legajo se valida contra el padrón de alumnos a ingresar.</span>
+        </div>
+      </div>
+
+      <div class="marco panel-form">
+        <form id="form-ficha" novalidate>
+          <div class="campo">
+            <label class="rotulo" for="legajo">Legajo del alumno</label>
+            <div class="legajo-bloque" id="legajo-bloque" data-estado="vacio">
+              <span class="legajo-sello" aria-hidden="true"></span>
+              <input class="legajo-entrada" id="legajo" type="text" inputmode="numeric"
+                     autocomplete="off" maxlength="9" placeholder="0000000" aria-describedby="resolucion">
+            </div>
+            <div class="resolucion" id="resolucion" role="status" aria-live="polite" data-estado="vacio">
+              Ingresá los 7 dígitos del legajo para validar.
+            </div>
+          </div>
+
+          <div class="campo">
+            <label class="rotulo" for="motivo">Motivo de la excepción</label>
+            <select class="control" id="motivo"><option value="">Seleccioná un motivo</option></select>
+          </div>
+
+          <div class="campo">
+            <label class="rotulo" for="fecha">Fecha de recuperatorio asignada</label>
+            <select class="control" id="fecha"><option value="">Seleccioná una fecha</option></select>
+          </div>
+
+          <div class="campo">
+            <span class="rotulo" id="rotulo-adjunto">Documentación respaldatoria</span>
+            <div class="archivo-fila">
+              <input class="archivo-nativo" id="adjunto" type="file" accept="application/pdf,.pdf"
+                     aria-labelledby="rotulo-adjunto" aria-describedby="ayuda-adjunto">
+              <label class="btn" for="adjunto">Elegir archivo PDF</label>
+              <span class="archivo-nombre" id="adjunto-nombre">Ningún archivo seleccionado</span>
+              <button class="archivo-quitar" id="adjunto-quitar" type="button" hidden>Quitar</button>
+            </div>
+            <p class="ayuda" id="ayuda-adjunto">Solo PDF, hasta <span id="adjunto-max">10</span> MB. Opcional según el motivo.</p>
+          </div>
+
+          <div class="form-pie">
+            <button class="btn btn-principal" id="guardar" type="submit">Guardar ficha</button>
+            <button class="btn" id="cancelar" type="button">Cancelar</button>
+            <span class="dlg-nota" id="nota-ficha" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+      </div>
+    </section>
+
   </main>
 </div>
-
-<!-- ============================================================
-     DIÁLOGO · NUEVA FICHA
-     ============================================================ -->
-<dialog id="dlg-ficha" aria-labelledby="dlg-ficha-titulo">
-  <form id="form-ficha" novalidate>
-    <div class="dlg-cabecera">
-      <div>
-        <h2 class="dlg-titulo" id="dlg-ficha-titulo">Nueva ficha de excepción</h2>
-        <p class="dlg-bajada">El legajo se valida contra el padrón de alumnos a ingresar.</p>
-      </div>
-      <button class="dlg-cerrar" id="cerrar-ficha" type="button" aria-label="Cerrar sin guardar">&times;</button>
-    </div>
-
-    <div class="dlg-cuerpo">
-      <div class="campo">
-        <label class="rotulo" for="legajo">Legajo del alumno</label>
-        <div class="legajo-bloque" id="legajo-bloque" data-estado="vacio">
-          <span class="legajo-sello" aria-hidden="true"></span>
-          <input class="legajo-entrada" id="legajo" type="text" inputmode="numeric"
-                 autocomplete="off" maxlength="9" placeholder="0000000" aria-describedby="resolucion">
-        </div>
-        <div class="resolucion" id="resolucion" role="status" aria-live="polite" data-estado="vacio">
-          Ingresá los 7 dígitos del legajo para validar.
-        </div>
-      </div>
-
-      <div class="campo">
-        <label class="rotulo" for="motivo">Motivo de la excepción</label>
-        <select class="control" id="motivo"><option value="">Seleccioná un motivo</option></select>
-      </div>
-
-      <div class="campo">
-        <label class="rotulo" for="fecha">Fecha de recuperatorio asignada</label>
-        <select class="control" id="fecha"><option value="">Seleccioná una fecha</option></select>
-      </div>
-
-      <div class="campo">
-        <span class="rotulo" id="rotulo-adjunto">Documentación respaldatoria</span>
-        <div class="archivo-fila">
-          <input class="archivo-nativo" id="adjunto" type="file" accept="application/pdf,.pdf"
-                 aria-labelledby="rotulo-adjunto" aria-describedby="ayuda-adjunto">
-          <label class="btn" for="adjunto">Elegir archivo PDF</label>
-          <span class="archivo-nombre" id="adjunto-nombre">Ningún archivo seleccionado</span>
-          <button class="archivo-quitar" id="adjunto-quitar" type="button" hidden>Quitar</button>
-        </div>
-        <p class="ayuda" id="ayuda-adjunto">Solo PDF, hasta <span id="adjunto-max">10</span> MB. Opcional según el motivo.</p>
-      </div>
-    </div>
-
-    <div class="dlg-pie">
-      <button class="btn btn-principal" id="guardar" type="submit">Guardar ficha</button>
-      <button class="btn" id="cancelar" type="button">Cancelar</button>
-      <span class="dlg-nota" id="nota-ficha" role="status" aria-live="polite"></span>
-    </div>
-  </form>
-</dialog>
 
 <!-- ============================================================
      DIÁLOGO · CONFIGURACIÓN (solo admin)
@@ -1000,15 +1075,40 @@ function armarCsv(fichas) {
   return lineas.join('\r\n');
 }
 
-/** Filtra el listado por texto libre sobre legajo, alumno, motivo y folio. */
-function filtrarFichas(fichas, consulta) {
-  const termino = String(consulta || '').trim().toLowerCase();
-  if (!termino) return fichas;
-  return fichas.filter((f) =>
-    f.legajo.includes(termino) ||
-    f.alumno.toLowerCase().includes(termino) ||
-    f.motivo.toLowerCase().includes(termino) ||
-    f.folio.toLowerCase().includes(termino)
+/**
+ * Filtra el listado combinando los cinco criterios de la barra de filtros.
+ * Los campos de texto buscan por coincidencia parcial; los selectores, exacta.
+ * Un criterio vacío no filtra nada.
+ *
+ * @param {object} filtros {alumno, legajo, motivo, fecha, estado}
+ * @param {string} hoyIso  'AAAA-MM-DD' para decidir vigente vs. vencida
+ */
+function aplicarFiltros(fichas, filtros, hoyIso) {
+  const alumno = String(filtros.alumno || '').trim().toLowerCase();
+  const legajo = normalizarLegajo(filtros.legajo);
+  const motivo = String(filtros.motivo || '');
+  const fecha  = String(filtros.fecha || '');
+  const estado = String(filtros.estado || 'todas');
+
+  return fichas.filter((f) => {
+    if (alumno && !f.alumno.toLowerCase().includes(alumno)) return false;
+    if (legajo && !f.legajo.includes(legajo)) return false;
+    if (motivo && f.motivo !== motivo) return false;
+    if (fecha  && f.fechaRecuperatorio !== fecha) return false;
+    if (estado === 'vigentes' && f.fechaRecuperatorio <  hoyIso) return false;
+    if (estado === 'vencidas' && f.fechaRecuperatorio >= hoyIso) return false;
+    return true;
+  });
+}
+
+/** ¿Hay algún criterio activo? Sirve para elegir el mensaje del estado vacío. */
+function hayFiltros(filtros) {
+  return Boolean(
+    String(filtros.alumno || '').trim() ||
+    normalizarLegajo(filtros.legajo) ||
+    filtros.motivo ||
+    filtros.fecha ||
+    (filtros.estado && filtros.estado !== 'todas')
   );
 }
 
@@ -1073,13 +1173,17 @@ const dom = {
 
   barraCantidad: el('barra-cantidad'),
   abrirConfig: el('abrir-config'),
-  abrirFicha: el('abrir-ficha'),
   sesionRol: el('sesion-rol'),
   sesionNombre: el('sesion-nombre'),
   salir: el('salir'),
 
+  navFichas: el('nav-fichas'),
+  navNueva: el('nav-nueva'),
+  vistaFichas: el('vista-fichas'),
+  vistaNueva: el('vista-nueva'),
+  irNueva: el('ir-nueva'),
+
   conteo: el('conteo'),
-  buscar: el('buscar'),
   exportar: el('exportar'),
   tabla: el('tabla'),
   cuerpoTabla: el('cuerpo-tabla'),
@@ -1088,9 +1192,14 @@ const dom = {
   vacioTexto: el('vacio-texto'),
   vacioAccion: el('vacio-accion'),
 
-  dlgFicha: el('dlg-ficha'),
+  fAlumno: el('f-alumno'),
+  fLegajo: el('f-legajo'),
+  fMotivo: el('f-motivo'),
+  fFecha: el('f-fecha'),
+  fEstado: el('f-estado'),
+  limpiarFiltros: el('limpiar-filtros'),
+
   formFicha: el('form-ficha'),
-  cerrarFicha: el('cerrar-ficha'),
   cancelar: el('cancelar'),
   legajo: el('legajo'),
   legajoBloque: el('legajo-bloque'),
@@ -1144,24 +1253,44 @@ async function iniciarSesion(sesion) {
   dom.formAcceso.reset();
   dom.accesoError.hidden = true;
 
+  mostrarVista('fichas');
   dom.conteo.textContent = 'Cargando…';
   dom.tabla.hidden = true;
   dom.vacio.hidden = true;
 
   await Promise.all([cargarConfig(), cargarFichas()]);
   poblarSelects();
-  pintarTabla();
+  refrescarListado();
 }
 
 function cerrarSesion() {
   estado.sesion = null;
   try { sessionStorage.removeItem(CLAVE_SESION); } catch { /* almacenamiento bloqueado */ }
-  dom.dlgFicha.close();
   dom.dlgConfig.close();
   dom.pantallaApp.hidden = true;
   dom.pantallaAcceso.hidden = false;
-  dom.buscar.value = '';
+  limpiarFiltros();
+  mostrarVista('fichas');
   dom.usuario.focus();
+}
+
+/* ============================================================
+   VISTAS
+   El listado y el alta son dos pantallas excluyentes, no un
+   diálogo sobre el listado: el alta necesita el ancho completo
+   y el operador entra a una u otra, nunca a las dos a la vez.
+   ============================================================ */
+
+function mostrarVista(nombre) {
+  const enListado = nombre !== 'nueva';
+
+  dom.vistaFichas.hidden = !enListado;
+  dom.vistaNueva.hidden = enListado;
+
+  for (const [boton, activo] of [[dom.navFichas, enListado], [dom.navNueva, !enListado]]) {
+    if (activo) boton.setAttribute('aria-current', 'page');
+    else boton.removeAttribute('aria-current');
+  }
 }
 
 /** Corta la acción si la sesión no tiene el permiso. Evita errores, no ataques. */
@@ -1452,12 +1581,72 @@ function crearFila(ficha) {
   imprimir.addEventListener('click', () => imprimirFicha(ficha));
   acciones.append(imprimir);
 
+  // Eliminar es solo para admin: el operador no borra lo que carga.
+  if (puede(estado.sesion, 'configurar')) {
+    const borrar = document.createElement('button');
+    borrar.type = 'button';
+    borrar.className = 'btn btn-fila btn-riesgo';
+    borrar.style.marginLeft = 'var(--sp-2)';
+    borrar.textContent = 'Eliminar';
+    borrar.addEventListener('click', () => eliminarFicha(ficha, borrar));
+    acciones.append(borrar);
+  }
+
   fila.append(legajo, alumno, motivo, recuperatorio, documentacion, folio, acciones);
   return fila;
 }
 
+/** Lee el estado actual de la barra de filtros. */
+function leerFiltros() {
+  return {
+    alumno: dom.fAlumno.value,
+    legajo: dom.fLegajo.value,
+    motivo: dom.fMotivo.value,
+    fecha:  dom.fFecha.value,
+    estado: dom.fEstado.value
+  };
+}
+
+function limpiarFiltros() {
+  dom.fAlumno.value = '';
+  dom.fLegajo.value = '';
+  dom.fMotivo.value = '';
+  dom.fFecha.value = '';
+  dom.fEstado.value = 'todas';
+}
+
+/** Las fichas que se ven ahora mismo, ya filtradas. */
+function fichasVisibles() {
+  return aplicarFiltros(estado.fichas, leerFiltros(), isoLocal(new Date()));
+}
+
+/**
+ * Llena los selectores de motivo y fecha con los valores que realmente
+ * aparecen en las fichas: así ninguna opción del filtro devuelve cero
+ * resultados. Conserva la selección previa si sigue existiendo.
+ */
+function poblarFiltros() {
+  const motivos = [...new Set(estado.fichas.map((f) => f.motivo))].sort((a, b) => a.localeCompare(b, 'es'));
+  const motivoPrevio = dom.fMotivo.value;
+  dom.fMotivo.replaceChildren(new Option('Todos', ''));
+  for (const m of motivos) dom.fMotivo.append(new Option(m, m));
+  dom.fMotivo.value = motivos.includes(motivoPrevio) ? motivoPrevio : '';
+
+  const fechas = [...new Set(estado.fichas.map((f) => f.fechaRecuperatorio))].sort();
+  const fechaPrevia = dom.fFecha.value;
+  dom.fFecha.replaceChildren(new Option('Todas', ''));
+  for (const f of fechas) dom.fFecha.append(new Option(fechaLarga(f), f));
+  dom.fFecha.value = fechas.includes(fechaPrevia) ? fechaPrevia : '';
+}
+
+/** Recalcula opciones de filtro y repinta. Usar cuando cambia el conjunto de fichas. */
+function refrescarListado() {
+  poblarFiltros();
+  pintarTabla();
+}
+
 function pintarTabla() {
-  const visibles = filtrarFichas(estado.fichas, dom.buscar.value);
+  const visibles = fichasVisibles();
   const hayFichas = estado.fichas.length > 0;
   const hayVisibles = visibles.length > 0;
 
@@ -1473,18 +1662,54 @@ function pintarTabla() {
     dom.vacioAccion.hidden = false;
     dom.conteo.textContent = 'Sin fichas cargadas';
   } else if (!hayVisibles) {
-    dom.vacioTitulo.textContent = 'Ninguna ficha coincide con la búsqueda';
-    dom.vacioTexto.textContent = 'Probá con otro legajo, apellido o motivo.';
+    dom.vacioTitulo.textContent = 'Ninguna ficha coincide con los filtros';
+    dom.vacioTexto.textContent = 'Probá quitando algún criterio o usá "Limpiar filtros" para ver el listado completo.';
     dom.vacioAccion.hidden = true;
     dom.conteo.textContent = '0 de ' + estado.fichas.length + ' fichas';
   } else {
-    dom.conteo.textContent = visibles.length === estado.fichas.length
-      ? (estado.fichas.length === 1 ? '1 ficha' : estado.fichas.length + ' fichas')
-      : visibles.length + ' de ' + estado.fichas.length + ' fichas';
+    dom.conteo.textContent = hayFiltros(leerFiltros())
+      ? visibles.length + ' de ' + estado.fichas.length + ' fichas'
+      : (estado.fichas.length === 1 ? '1 ficha' : estado.fichas.length + ' fichas');
   }
 
   dom.exportar.disabled = !hayVisibles;
   estado.recienCreada = null;
+}
+
+/**
+ * Borra una ficha de la base y su PDF del bucket. Solo admin: existe para
+ * limpiar las fichas de prueba, no como parte del circuito normal.
+ */
+async function eliminarFicha(ficha, boton) {
+  if (!exigir('configurar')) return;
+
+  const confirmado = window.confirm(
+    'Eliminar la ficha ' + ficha.folio + '?\n\n' +
+    'Alumno: ' + ficha.alumno + '\n' +
+    (ficha.adjuntoNombre ? 'Se borra también el PDF adjunto.\n' : '') +
+    '\nNo se puede deshacer.'
+  );
+  if (!confirmado) return;
+
+  boton.disabled = true;
+  boton.textContent = 'Borrando…';
+
+  // El PDF primero: si falla el borrado de la fila, el archivo huérfano
+  // es un problema menor comparado con una fila sin su adjunto.
+  if (ficha.adjuntoPath) {
+    await supa.storage.from(BUCKET_PDF).remove([ficha.adjuntoPath]);
+  }
+
+  const { error } = await supa.from('fichas').delete().eq('id', ficha.id);
+  if (error) {
+    boton.disabled = false;
+    boton.textContent = 'Eliminar';
+    window.alert('No se pudo eliminar la ficha. Intentá de nuevo.');
+    return;
+  }
+
+  estado.fichas = estado.fichas.filter((f) => f.id !== ficha.id);
+  refrescarListado();
 }
 
 async function abrirPdf(ficha, boton) {
@@ -1528,7 +1753,7 @@ function imprimirFicha(ficha) {
 }
 
 function exportarCsv() {
-  const visibles = filtrarFichas(estado.fichas, dom.buscar.value);
+  const visibles = fichasVisibles();
   if (visibles.length === 0) return;
   // El BOM hace que Excel abra el archivo en UTF-8 sin romper los acentos.
   const contenido = new Blob(['﻿' + armarCsv(visibles)], { type: 'text/csv;charset=utf-8' });
@@ -1576,7 +1801,7 @@ function limpiarAdjunto() {
   dom.adjuntoQuitar.hidden = true;
 }
 
-function abrirDialogoFicha() {
+function irANuevaFicha() {
   if (!exigir('fichas')) return;
   poblarSelects();
   dom.formFicha.reset();
@@ -1584,7 +1809,7 @@ function abrirDialogoFicha() {
   limpiarAdjunto();
   avisar(dom.notaFicha, '', null);
   evaluarLegajo();
-  dom.dlgFicha.showModal();
+  mostrarVista('nueva');
   dom.legajo.focus();
 }
 
@@ -1664,8 +1889,11 @@ async function guardarFicha() {
 
   estado.fichas.unshift(ficha);
   estado.recienCreada = ficha.id;
-  pintarTabla();
-  dom.dlgFicha.close();
+  // La ficha nueva tiene que verse sí o sí al volver al listado: si quedaba
+  // un filtro puesto que la excluye, el operador creería que no se guardó.
+  limpiarFiltros();
+  refrescarListado();
+  mostrarVista('fichas');
 }
 
 /* ============================================================
@@ -1769,10 +1997,11 @@ dom.formAcceso.addEventListener('submit', async (evento) => {
 
 dom.salir.addEventListener('click', cerrarSesion);
 
-dom.abrirFicha.addEventListener('click', abrirDialogoFicha);
-dom.vacioAccion.addEventListener('click', abrirDialogoFicha);
-dom.cerrarFicha.addEventListener('click', () => dom.dlgFicha.close());
-dom.cancelar.addEventListener('click', () => dom.dlgFicha.close());
+dom.navFichas.addEventListener('click', () => mostrarVista('fichas'));
+dom.navNueva.addEventListener('click', irANuevaFicha);
+dom.irNueva.addEventListener('click', irANuevaFicha);
+dom.vacioAccion.addEventListener('click', irANuevaFicha);
+dom.cancelar.addEventListener('click', () => mostrarVista('fichas'));
 
 dom.formFicha.addEventListener('submit', (evento) => {
   evento.preventDefault();
@@ -1835,7 +2064,10 @@ dom.padronArchivo.addEventListener('change', () => {
   dom.padronArchivo.value = '';
 });
 
-dom.buscar.addEventListener('input', pintarTabla);
+for (const campo of [dom.fAlumno, dom.fLegajo]) campo.addEventListener('input', pintarTabla);
+for (const selector of [dom.fMotivo, dom.fFecha, dom.fEstado]) selector.addEventListener('change', pintarTabla);
+dom.limpiarFiltros.addEventListener('click', () => { limpiarFiltros(); pintarTabla(); });
+
 dom.exportar.addEventListener('click', exportarCsv);
 
 /* ============================================================
@@ -1961,11 +2193,31 @@ if (location.search.includes('test')) {
       creada: new Date(2026, 8, 1, 18, 25).toISOString(), creadaPor: 'Romero' }
   ];
 
-  iguales(filtrarFichas(muestra, '').length, 2, 'filtro vacío devuelve todo');
-  iguales(filtrarFichas(muestra, '1251113').length, 1, 'filtro por legajo');
-  iguales(filtrarFichas(muestra, 'garnica').length, 1, 'filtro por apellido sin distinguir mayúsculas');
-  iguales(filtrarFichas(muestra, 'salud').length, 1, 'filtro por motivo');
-  iguales(filtrarFichas(muestra, 'zzz').length, 0, 'filtro sin coincidencias');
+  const sinFiltro = { alumno: '', legajo: '', motivo: '', fecha: '', estado: 'todas' };
+  const conFiltro = (cambios) => aplicarFiltros(muestra, { ...sinFiltro, ...cambios }, '2026-10-01');
+
+  iguales(conFiltro({}).length, 2, 'sin filtros devuelve todo');
+  iguales(conFiltro({ alumno: 'garnica' }).length, 1, 'filtro por apellido sin distinguir mayúsculas');
+  iguales(conFiltro({ alumno: '  GARNICA  ' }).length, 1, 'filtro de alumno con espacios y mayúsculas');
+  iguales(conFiltro({ alumno: 'zzz' }).length, 0, 'filtro de alumno sin coincidencias');
+  iguales(conFiltro({ legajo: '1251113' }).length, 1, 'filtro por legajo exacto');
+  iguales(conFiltro({ legajo: '125' }).length, 2, 'filtro por legajo parcial');
+  iguales(conFiltro({ legajo: '12-511' }).length, 1, 'filtro de legajo normaliza separadores');
+  iguales(conFiltro({ motivo: 'Razones de salud' }).length, 1, 'filtro por motivo exacto');
+  iguales(conFiltro({ motivo: 'Razones' }).length, 0, 'el motivo no coincide parcialmente');
+  iguales(conFiltro({ fecha: '2026-10-13' }).length, 1, 'filtro por fecha de recuperatorio');
+  iguales(conFiltro({ estado: 'vigentes' }).length, 1, 'solo vigentes al 01/10');
+  iguales(conFiltro({ estado: 'vigentes' })[0].folio, 'EX-2', 'la vigente es la del 13/10');
+  iguales(conFiltro({ estado: 'vencidas' }).length, 1, 'solo vencidas al 01/10');
+  iguales(conFiltro({ estado: 'vencidas' })[0].folio, 'EX-1', 'la vencida es la del 29/09');
+  iguales(aplicarFiltros(muestra, sinFiltro, '2026-09-01').length, 2, 'ninguna vencida antes de las dos fechas');
+  iguales(conFiltro({ alumno: 'garnica', estado: 'vencidas' }).length, 0, 'los criterios se combinan con Y');
+
+  iguales(hayFiltros(sinFiltro), false, 'sin criterios no hay filtros');
+  iguales(hayFiltros({ ...sinFiltro, alumno: '   ' }), false, 'solo espacios no cuenta como filtro');
+  iguales(hayFiltros({ ...sinFiltro, legajo: '-' }), false, 'legajo sin dígitos no cuenta como filtro');
+  iguales(hayFiltros({ ...sinFiltro, alumno: 'a' }), true, 'un criterio de texto cuenta');
+  iguales(hayFiltros({ ...sinFiltro, estado: 'vigentes' }), true, 'el estado distinto de todas cuenta');
 
   iguales(campoCsv('Lovera; Daniel'), '"Lovera; Daniel"', 'CSV entrecomilla el separador');
   iguales(campoCsv('Lovera Roja, Daniel'), '"Lovera Roja, Daniel"', 'CSV entrecomilla la coma del nombre');
