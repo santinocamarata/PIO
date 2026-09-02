@@ -267,8 +267,9 @@ body {
 /* El folio ya repite la fecha y el legajo que están en sus propias columnas.
    Va angosto y partido en dos renglones: mantener los 24 caracteres en una
    sola línea empujaba Imprimir y Eliminar fuera de la pantalla. */
-/* Ancho preferido, no fijo: el algoritmo de tabla lo ajusta según el espacio.
-   Los dos renglones los arma partirFolio(), no el wrapping del navegador. */
+/* Los dos renglones los arma partirFolio(), no el wrapping del navegador.
+   Con nowrap el mínimo real lo fija el renglón más largo (~103px), así que
+   este valor solo evita que la columna se estire de más. */
 .celda-folio, .col-folio {
   width: 104px;
   padding-left: var(--sp-2); padding-right: var(--sp-2);
@@ -283,7 +284,7 @@ body {
 .acciones-fila { display: flex; justify-content: flex-end; gap: var(--sp-2); }
 
 .enlace-pdf {
-  display: inline-block; max-width: 112px; min-height: 32px;
+  display: inline-block; max-width: 104px; min-height: 32px;
   padding: 6px var(--sp-2);
   border: 1px solid var(--borde); border-radius: 2px;
   background: var(--superficie); color: var(--institucional-2);
