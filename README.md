@@ -250,6 +250,8 @@ todas las llamadas fallan con 401. La `service_role` **nunca** va en el HTML.
 | `build_padron.py` | Regenera `padron.js` desde un Excel |
 | `supabase_setup.sql` | Migración inicial de la base. Correr una sola vez |
 | `vercel.json` | Sitio estático sin build, y las cabeceras de seguridad |
+| `favicon.png` | Ícono de la pestaña del navegador |
+| `giampi.jpg` | Un huevo de pascua. Escribir *gian ciampi* en el filtro de alumno |
 
 ## Verificación
 
