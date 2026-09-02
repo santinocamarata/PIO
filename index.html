@@ -267,8 +267,11 @@ body {
 /* El folio ya repite la fecha y el legajo que están en sus propias columnas.
    Va angosto y partido en dos renglones: mantener los 24 caracteres en una
    sola línea empujaba Imprimir y Eliminar fuera de la pantalla. */
+/* 118px es un ancho preferido, no fijo: cuando la ventana aprieta, el
+   algoritmo de tabla lo negocia a ~100px y el folio pasa a tres renglones
+   en vez de cuatro; cuando sobra lugar, entra en dos. */
 .celda-folio, .col-folio {
-  width: 98px;
+  width: 118px;
   padding-left: var(--sp-2); padding-right: var(--sp-2);
 }
 .celda-folio {
