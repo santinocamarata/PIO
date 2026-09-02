@@ -56,6 +56,34 @@ documentación adjunta y el número de ficha.
   fichas de prueba, no es parte del circuito normal.
 - **Exportar CSV** baja el listado tal como está filtrado, incluyendo qué usuario
   emitió cada ficha.
+- **Exportar carpetas** baja un ZIP con la documentación, agrupada por fecha.
+
+### Exportar carpetas
+
+Arma un ZIP con una carpeta por fecha de recuperatorio y, adentro de cada una,
+los PDF de las fichas de esa fecha:
+
+```
+documentacion-recuperatorios-2026-09-02.zip
+├── 2026-09-29/
+│   ├── 1251113 - certificado medico.pdf
+│   └── 1248471 - constancia laboral.pdf
+└── 2026-10-13/
+    └── 1247358 - pasajes.pdf
+```
+
+**Las carpetas se nombran en ISO (`2026-09-29`), no en `29/09/2026`.** Es el
+único formato en el que el orden alfabético del explorador de archivos coincide
+con el orden del calendario: con `dd/mm/aaaa`, el `13/10` quedaría antes que el
+`29/09`.
+
+Cada archivo lleva el legajo adelante, porque dos alumnos distintos suben
+seguido un `certificado.pdf`. Si aun así hay dos nombres iguales en la misma
+carpeta, el segundo se desambigua con el número de ficha.
+
+El ZIP se arma con **las fichas que estás viendo**, igual que el CSV: si querés
+solo una fecha, filtrala primero. Las fichas sin adjunto no generan carpeta.
+El compresor se descarga de internet la primera vez que se usa el botón.
 
 ### Filtros
 

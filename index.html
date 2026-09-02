@@ -246,13 +246,13 @@ body {
 .tabla { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 .tabla thead th {
   position: sticky; top: 0;
-  padding: var(--sp-3) var(--sp-4);
+  padding: var(--sp-3);
   border-bottom: 1px solid var(--borde);
   background: var(--superficie-2); color: var(--tinta-suave);
   font-size: 11.5px; font-weight: 700; letter-spacing: 0.09em;
   text-transform: uppercase; text-align: left; white-space: nowrap;
 }
-.tabla tbody td { padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--regla); vertical-align: middle; }
+.tabla tbody td { padding: var(--sp-3); border-bottom: 1px solid var(--regla); vertical-align: middle; }
 .tabla tbody tr:last-child td { border-bottom: none; }
 .tabla tbody tr:hover td { background: var(--superficie-2); }
 
@@ -261,7 +261,7 @@ body {
   font-variant-numeric: tabular-nums; letter-spacing: 0.03em; white-space: nowrap;
 }
 .celda-alumno { font-weight: 600; min-width: 150px; }
-.celda-motivo { color: var(--tinta-suave); min-width: 175px; }
+.celda-motivo { color: var(--tinta-suave); min-width: 165px; }
 .celda-fecha { font-family: var(--mono); font-size: 13.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* El folio ya repite la fecha y el legajo que están en sus propias columnas.
@@ -280,7 +280,7 @@ body {
 .acciones-fila { display: flex; justify-content: flex-end; gap: var(--sp-2); }
 
 .enlace-pdf {
-  display: inline-block; max-width: 155px; min-height: 32px;
+  display: inline-block; max-width: 112px; min-height: 32px;
   padding: 6px var(--sp-2);
   border: 1px solid var(--borde); border-radius: 2px;
   background: var(--superficie); color: var(--institucional-2);
@@ -645,8 +645,8 @@ select.control { cursor: pointer; }
                 <th scope="col">Legajo</th>
                 <th scope="col">Alumno</th>
                 <th scope="col">Motivo</th>
-                <th scope="col">Recuperatorio</th>
-                <th scope="col">Documentación</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Adjunto</th>
                 <th class="col-folio" scope="col">Ficha N.º</th>
                 <th scope="col"><span class="sr">Acciones</span></th>
               </tr>
