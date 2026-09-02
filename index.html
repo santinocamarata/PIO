@@ -192,7 +192,7 @@ body {
 .btn-sobre-barra:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.6); }
 .btn-sobre-barra:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
-.btn-fila { min-height: 32px; padding: 0 var(--sp-3); font-size: 13px; }
+.btn-fila { min-height: 32px; padding: 0 10px; font-size: 13px; white-space: nowrap; }
 .btn-riesgo { color: var(--error); border-color: var(--borde); }
 .btn-riesgo:hover:not(:disabled) { background: var(--error-fondo); border-color: var(--error); }
 
@@ -260,14 +260,27 @@ body {
   font-family: var(--mono); font-size: 14px; font-weight: 700;
   font-variant-numeric: tabular-nums; letter-spacing: 0.03em; white-space: nowrap;
 }
-.celda-alumno { font-weight: 600; min-width: 190px; }
-.celda-motivo { color: var(--tinta-suave); min-width: 230px; }
+.celda-alumno { font-weight: 600; min-width: 150px; }
+.celda-motivo { color: var(--tinta-suave); min-width: 175px; }
 .celda-fecha { font-family: var(--mono); font-size: 13.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.celda-acciones { text-align: right; white-space: nowrap; }
-.celda-folio { font-family: var(--mono); font-size: 12px; color: var(--tinta-tenue); white-space: nowrap; }
+
+/* El folio ya repite la fecha y el legajo que están en sus propias columnas.
+   Va angosto y partido en dos renglones: mantener los 24 caracteres en una
+   sola línea empujaba Imprimir y Eliminar fuera de la pantalla. */
+.celda-folio, .col-folio {
+  width: 98px;
+  padding-left: var(--sp-2); padding-right: var(--sp-2);
+}
+.celda-folio {
+  font-family: var(--mono); font-size: 11px; line-height: 1.35;
+  color: var(--tinta-tenue); overflow-wrap: anywhere;
+}
+
+.celda-acciones { text-align: right; padding-left: var(--sp-2); }
+.acciones-fila { display: flex; justify-content: flex-end; gap: var(--sp-2); }
 
 .enlace-pdf {
-  display: inline-block; max-width: 210px; min-height: 32px;
+  display: inline-block; max-width: 155px; min-height: 32px;
   padding: 6px var(--sp-2);
   border: 1px solid var(--borde); border-radius: 2px;
   background: var(--superficie); color: var(--institucional-2);
@@ -588,6 +601,8 @@ select.control { cursor: pointer; }
         </div>
         <div class="area-herramientas">
           <button class="btn" id="exportar" type="button">Exportar CSV</button>
+          <button class="btn" id="exportar-zip" type="button"
+                  title="Baja un ZIP con una carpeta por fecha de recuperatorio, y adentro los PDF de esa fecha">Exportar carpetas</button>
           <button class="btn btn-principal" id="ir-nueva" type="button">Nueva ficha</button>
         </div>
       </div>
@@ -632,7 +647,7 @@ select.control { cursor: pointer; }
                 <th scope="col">Motivo</th>
                 <th scope="col">Recuperatorio</th>
                 <th scope="col">Documentación</th>
-                <th scope="col">Ficha N.º</th>
+                <th class="col-folio" scope="col">Ficha N.º</th>
                 <th scope="col"><span class="sr">Acciones</span></th>
               </tr>
             </thead>
@@ -1075,6 +1090,55 @@ function armarCsv(fichas) {
   return lineas.join('\r\n');
 }
 
+/** Reemplaza los caracteres que Windows no acepta en nombres de archivo. */
+function sanearNombre(texto) {
+  return String(texto === null || texto === undefined ? '' : texto)
+    .replace(/[\\/:*?"<>|]/g, '-')
+    .replace(/\s+/g, ' ')
+    .replace(/^\.+/, '')
+    .trim();
+}
+
+/**
+ * Agrupa las fichas que tienen PDF por fecha de recuperatorio.
+ * @returns {Array<[string, object[]]>} pares [fechaIso, fichas], en orden de calendario.
+ *
+ * La fecha se deja en ISO (2026-09-29) y no en formato local (29/09/2026):
+ * es el nombre de la carpeta, y en ISO el orden alfabético del explorador de
+ * archivos coincide con el orden del calendario. Con dd/mm/aaaa, "29/09" y
+ * "13/10" quedarían al revés.
+ */
+function agruparPorFecha(fichas) {
+  const porFecha = new Map();
+  for (const ficha of fichas) {
+    if (!ficha.adjuntoPath) continue;
+    const clave = ficha.fechaRecuperatorio;
+    if (!porFecha.has(clave)) porFecha.set(clave, []);
+    porFecha.get(clave).push(ficha);
+  }
+  return [...porFecha.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+/**
+ * Nombre del PDF dentro de su carpeta. Antepone el legajo para que dos alumnos
+ * que hayan subido "certificado.pdf" no se pisen, y agrega el folio si aun así
+ * coinciden. `usados` acumula los nombres ya asignados en esa carpeta.
+ */
+function nombreEnCarpeta(ficha, usados) {
+  const propuesto = sanearNombre(ficha.legajo + ' - ' + (ficha.adjuntoNombre || 'documento.pdf'));
+  let nombre = propuesto || ficha.folio + '.pdf';
+
+  if (usados.has(nombre)) {
+    const punto = nombre.lastIndexOf('.');
+    const cuerpo = punto > 0 ? nombre.slice(0, punto) : nombre;
+    const extension = punto > 0 ? nombre.slice(punto) : '';
+    nombre = cuerpo + ' (' + ficha.folio + ')' + extension;
+  }
+
+  usados.add(nombre);
+  return nombre;
+}
+
 /**
  * Filtra el listado combinando los cinco criterios de la barra de filtros.
  * Los campos de texto buscan por coincidencia parcial; los selectores, exacta.
@@ -1185,6 +1249,7 @@ const dom = {
 
   conteo: el('conteo'),
   exportar: el('exportar'),
+  exportarZip: el('exportar-zip'),
   tabla: el('tabla'),
   cuerpoTabla: el('cuerpo-tabla'),
   vacio: el('vacio'),
@@ -1574,23 +1639,27 @@ function crearFila(ficha) {
 
   const acciones = document.createElement('td');
   acciones.className = 'celda-acciones';
+  const grupo = document.createElement('div');
+  grupo.className = 'acciones-fila';
+
   const imprimir = document.createElement('button');
   imprimir.type = 'button';
   imprimir.className = 'btn btn-fila';
   imprimir.textContent = 'Imprimir';
   imprimir.addEventListener('click', () => imprimirFicha(ficha));
-  acciones.append(imprimir);
+  grupo.append(imprimir);
 
   // Eliminar es solo para admin: el operador no borra lo que carga.
   if (puede(estado.sesion, 'configurar')) {
     const borrar = document.createElement('button');
     borrar.type = 'button';
     borrar.className = 'btn btn-fila btn-riesgo';
-    borrar.style.marginLeft = 'var(--sp-2)';
     borrar.textContent = 'Eliminar';
     borrar.addEventListener('click', () => eliminarFicha(ficha, borrar));
-    acciones.append(borrar);
+    grupo.append(borrar);
   }
+
+  acciones.append(grupo);
 
   fila.append(legajo, alumno, motivo, recuperatorio, documentacion, folio, acciones);
   return fila;
@@ -1673,6 +1742,13 @@ function pintarTabla() {
   }
 
   dom.exportar.disabled = !hayVisibles;
+  // El ZIP solo tiene sentido si alguna de las fichas visibles trae PDF.
+  const conAdjunto = visibles.filter((f) => f.adjuntoPath).length;
+  dom.exportarZip.disabled = conAdjunto === 0;
+  dom.exportarZip.title = conAdjunto === 0
+    ? 'Ninguna de las fichas visibles tiene documentación adjunta'
+    : 'Baja un ZIP con ' + conAdjunto + ' PDF, en una carpeta por fecha de recuperatorio';
+
   estado.recienCreada = null;
 }
 
@@ -1766,7 +1842,86 @@ function exportarCsv() {
 }
 
 /* ============================================================
-   DIÁLOGO DE FICHA
+   EXPORTAR CARPETAS
+   Un ZIP con una carpeta por fecha de recuperatorio y, adentro,
+   los PDF de las fichas de esa fecha.
+   ============================================================ */
+
+function cargarJsZip() {
+  if (window.JSZip) return Promise.resolve(window.JSZip);
+  return new Promise((resolver, rechazar) => {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    script.onload = () => window.JSZip ? resolver(window.JSZip) : rechazar(new Error('sin JSZip'));
+    script.onerror = () => rechazar(new Error('sin red'));
+    document.head.append(script);
+  });
+}
+
+async function exportarCarpetas() {
+  const conPdf = fichasVisibles().filter((f) => f.adjuntoPath);
+
+  if (conPdf.length === 0) {
+    window.alert('Ninguna de las fichas del listado tiene documentación adjunta.\n\n' +
+                 'El ZIP se arma con las fichas que ves ahora: si filtraste, revisá los filtros.');
+    return;
+  }
+
+  const boton = dom.exportarZip;
+  const textoOriginal = boton.textContent;
+  boton.disabled = true;
+
+  try {
+    boton.textContent = 'Preparando…';
+    const JSZip = await cargarJsZip();
+    const zip = new JSZip();
+
+    const grupos = agruparPorFecha(conPdf);
+    let bajados = 0;
+    const fallidos = [];
+
+    for (const [fecha, fichas] of grupos) {
+      const carpeta = zip.folder(fecha);
+      const usados = new Set();
+      for (const ficha of fichas) {
+        boton.textContent = 'Bajando ' + (bajados + fallidos.length + 1) + ' de ' + conPdf.length + '…';
+        const { data, error } = await supa.storage.from(BUCKET_PDF).download(ficha.adjuntoPath);
+        if (error || !data) { fallidos.push(ficha.folio); continue; }
+        carpeta.file(nombreEnCarpeta(ficha, usados), data);
+        bajados++;
+      }
+    }
+
+    if (bajados === 0) {
+      window.alert('No se pudo bajar ninguno de los ' + conPdf.length + ' PDF. Revisá la conexión.');
+      return;
+    }
+
+    boton.textContent = 'Comprimiendo…';
+    const contenido = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(contenido);
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.download = 'documentacion-recuperatorios-' + isoLocal(new Date()) + '.zip';
+    enlace.click();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+
+    if (fallidos.length > 0) {
+      window.alert('Se descargaron ' + bajados + ' de ' + conPdf.length + ' PDF.\n\n' +
+                   'No se pudieron bajar: ' + fallidos.join(', '));
+    }
+  } catch (error) {
+    window.alert(error && error.message === 'sin red'
+      ? 'No se pudo cargar el compresor. Hace falta conexión la primera vez que se usa el botón.'
+      : 'No se pudo armar el ZIP. Probá de nuevo o filtrá para bajar menos fichas por vez.');
+  } finally {
+    boton.disabled = false;
+    boton.textContent = textoOriginal;
+  }
+}
+
+/* ============================================================
+   VISTA DE ALTA
    ============================================================ */
 
 function evaluarLegajo() {
@@ -2069,6 +2224,7 @@ for (const selector of [dom.fMotivo, dom.fFecha, dom.fEstado]) selector.addEvent
 dom.limpiarFiltros.addEventListener('click', () => { limpiarFiltros(); pintarTabla(); });
 
 dom.exportar.addEventListener('click', exportarCsv);
+dom.exportarZip.addEventListener('click', exportarCarpetas);
 
 /* ============================================================
    INICIO
@@ -2212,6 +2368,39 @@ if (location.search.includes('test')) {
   iguales(conFiltro({ estado: 'vencidas' })[0].folio, 'EX-1', 'la vencida es la del 29/09');
   iguales(aplicarFiltros(muestra, sinFiltro, '2026-09-01').length, 2, 'ninguna vencida antes de las dos fechas');
   iguales(conFiltro({ alumno: 'garnica', estado: 'vencidas' }).length, 0, 'los criterios se combinan con Y');
+
+  // Exportación por carpetas
+  iguales(sanearNombre('cert: 12/09 <urgente>.pdf'), 'cert- 12-09 -urgente-.pdf', 'sanea los caracteres prohibidos');
+  iguales(sanearNombre('  espacios   de   más  '), 'espacios de más', 'colapsa espacios');
+  iguales(sanearNombre('...oculto.pdf'), 'oculto.pdf', 'no deja nombres que arranquen con punto');
+  iguales(sanearNombre(null), '', 'nombre nulo');
+
+  const conAdjunto = (folio, legajo, fecha, adjunto) => ({
+    folio, legajo, fechaRecuperatorio: fecha,
+    adjuntoNombre: adjunto, adjuntoPath: adjunto ? folio + '/' + adjunto : null
+  });
+  const paraZip = [
+    conAdjunto('EX-3', '1250173', '2026-10-13', 'cert.pdf'),
+    conAdjunto('EX-1', '1251113', '2026-09-29', 'cert.pdf'),
+    conAdjunto('EX-2', '1251113', '2026-09-29', 'cert.pdf'),
+    conAdjunto('EX-4', '1240001', '2026-09-29', null)
+  ];
+
+  const grupos = agruparPorFecha(paraZip);
+  iguales(grupos.length, 2, 'una carpeta por fecha con adjuntos');
+  iguales(grupos[0][0], '2026-09-29', 'la fecha más temprana va primero');
+  iguales(grupos[1][0], '2026-10-13', 'la fecha posterior va segunda');
+  iguales(grupos[0][1].length, 2, 'deja afuera la ficha sin adjunto');
+  iguales(agruparPorFecha([]).length, 0, 'sin fichas no hay carpetas');
+  iguales(agruparPorFecha([conAdjunto('EX-9', '1', '2026-01-01', null)]).length, 0, 'sin adjuntos no hay carpetas');
+
+  // Las claves en ISO ordenan como el calendario; en dd/mm/aaaa no lo harían.
+  iguales([...agruparPorFecha(paraZip).map((g) => g[0])].join(' '), '2026-09-29 2026-10-13', 'carpetas en orden de calendario');
+
+  const usados = new Set();
+  iguales(nombreEnCarpeta(paraZip[1], usados), '1251113 - cert.pdf', 'antepone el legajo');
+  iguales(nombreEnCarpeta(paraZip[2], usados), '1251113 - cert (EX-2).pdf', 'desambigua el nombre repetido con el folio');
+  iguales(nombreEnCarpeta(paraZip[0], usados), '1250173 - cert.pdf', 'otro legajo no necesita desambiguar');
 
   iguales(hayFiltros(sinFiltro), false, 'sin criterios no hay filtros');
   iguales(hayFiltros({ ...sinFiltro, alumno: '   ' }), false, 'solo espacios no cuenta como filtro');
