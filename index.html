@@ -267,17 +267,17 @@ body {
 /* El folio ya repite la fecha y el legajo que están en sus propias columnas.
    Va angosto y partido en dos renglones: mantener los 24 caracteres en una
    sola línea empujaba Imprimir y Eliminar fuera de la pantalla. */
-/* 118px es un ancho preferido, no fijo: cuando la ventana aprieta, el
-   algoritmo de tabla lo negocia a ~100px y el folio pasa a tres renglones
-   en vez de cuatro; cuando sobra lugar, entra en dos. */
+/* Ancho preferido, no fijo: el algoritmo de tabla lo ajusta según el espacio.
+   Los dos renglones los arma partirFolio(), no el wrapping del navegador. */
 .celda-folio, .col-folio {
-  width: 118px;
+  width: 104px;
   padding-left: var(--sp-2); padding-right: var(--sp-2);
 }
 .celda-folio {
   font-family: var(--mono); font-size: 11px; line-height: 1.35;
-  color: var(--tinta-tenue); overflow-wrap: anywhere;
+  color: var(--tinta-tenue);
 }
+.celda-folio span { display: block; white-space: nowrap; }
 
 .celda-acciones { text-align: right; padding-left: var(--sp-2); }
 .acciones-fila { display: flex; justify-content: flex-end; gap: var(--sp-2); }
@@ -1011,6 +1011,19 @@ function generarFolio(legajo, momento) {
        + '-' + legajo + '-' + dd(momento.getHours()) + dd(momento.getMinutes());
 }
 
+/**
+ * Parte el folio en dos renglones: 'EX-20260902' y '1247358-1225'.
+ *
+ * Dejar que el navegador lo corte solo daba cuatro renglones —parte en cada
+ * guión y no reagrupa— y era el folio, no el motivo, el que estiraba la altura
+ * de toda la fila. Partirlo acá deja el resultado igual en cualquier tipografía.
+ */
+function partirFolio(folio) {
+  const partes = String(folio === null || folio === undefined ? '' : folio).split('-');
+  if (partes.length !== 4) return [String(folio)];
+  return [partes.slice(0, 2).join('-'), partes.slice(2).join('-')];
+}
+
 /** Fecha (objeto Date) -> 'AAAA-MM-DD' en hora local, sin corrimiento por zona. */
 function isoLocal(fecha) {
   const dd = (n) => String(n).padStart(2, '0');
@@ -1638,7 +1651,12 @@ function crearFila(ficha) {
 
   const folio = document.createElement('td');
   folio.className = 'celda-folio';
-  folio.textContent = ficha.folio;
+  folio.title = ficha.folio;
+  for (const renglon of partirFolio(ficha.folio)) {
+    const linea = document.createElement('span');
+    linea.textContent = renglon;
+    folio.append(linea);
+  }
 
   const acciones = document.createElement('td');
   acciones.className = 'celda-acciones';
@@ -2336,6 +2354,10 @@ if (location.search.includes('test')) {
   iguales(csv[1][1], 'Lovera Roja, Daniel', 'CSV con coma entre comillas');
 
   iguales(generarFolio('1251113', new Date(2026, 8, 1, 9, 5)), 'EX-20260901-1251113-0905', 'folio');
+  iguales(partirFolio('EX-20260901-1251113-0905').join(' | '), 'EX-20260901 | 1251113-0905', 'folio en dos renglones');
+  iguales(partirFolio('EX-20260901-1251113-0905').length, 2, 'siempre dos renglones');
+  iguales(partirFolio('OTRO-FORMATO').length, 1, 'un folio con otra forma queda entero');
+  iguales(partirFolio('').length, 1, 'folio vacío no rompe');
   iguales(fechaLarga('2026-09-29'), 'Martes 29 de septiembre de 2026', 'fecha larga sin coma');
   iguales(fechaCorta('2026-09-29'), '29/09/2026', 'fecha corta');
   iguales(selloDeTiempo(new Date(2026, 8, 1, 18, 20)), '01/09/2026 · 18:20 h', 'sello 24 h');
