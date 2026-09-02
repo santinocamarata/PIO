@@ -608,8 +608,8 @@ select.control { cursor: pointer; }
           <button class="btn btn-principal btn-ancho" type="submit">Ingresar</button>
         </form>
         <p class="acceso-pie">
-          La sesión se cierra al cerrar el navegador. Si compartís el equipo con
-          otra persona, usá <b>Salir</b> cuando termines.
+          La sesión dura 10 horas y se cierra al cerrar el navegador. Si
+          compartís el equipo, usá <b>Salir</b> cuando termines.
         </p>
       </div>
     </div>
@@ -1024,11 +1024,12 @@ const USUARIOS = [
 const PBKDF2_ITERACIONES = 210000;
 const PBKDF2_BITS = 256;
 
-/* Ventanas de sesión. La aplicación corre en equipos compartidos de mesa de
-   entrada: si alguien se levanta sin cerrar sesión, la sesión tiene que
-   caducar sola. */
-const SESION_MAX_MS        = 8 * 60 * 60 * 1000;  // una jornada completa
-const SESION_INACTIVIDAD_MS = 30 * 60 * 1000;     // media hora sin tocar nada
+/* La sesión dura una jornada entera y NO caduca por inactividad: en el
+   mostrador se pasan horas sin tocar la pantalla entre alumno y alumno, y que
+   pidiera la contraseña de nuevo cada media hora molestaba más de lo que
+   protegía. Sigue cerrándose al cerrar el navegador —vive en sessionStorage—
+   y con el botón Salir. */
+const SESION_MAX_MS = 10 * 60 * 60 * 1000;
 
 /* Freno a la prueba de contraseñas a mano. Vive en memoria, así que recargar
    la página lo reinicia: sirve contra alguien tecleando en el mostrador, no
@@ -1563,29 +1564,20 @@ function avisar(nodo, texto, tipo) {
    ============================================================ */
 
 /**
- * ¿La sesión guardada sigue vigente? Caduca por jornada y por inactividad.
+ * ¿La sesión guardada sigue vigente? Solo cuenta desde que se abrió.
  * Se comprueba al arrancar y cada minuto mientras la aplicación está abierta.
  */
 function sesionVigente(sesion, ahora) {
   if (!sesion || !sesion.rol || !PERMISOS[sesion.rol]) return false;
-  if (typeof sesion.emitida !== 'number' || typeof sesion.ultimoUso !== 'number') return false;
-  if (ahora - sesion.emitida   > SESION_MAX_MS) return false;
-  if (ahora - sesion.ultimoUso > SESION_INACTIVIDAD_MS) return false;
-  return true;
-}
-
-/** Marca actividad para correr el reloj de inactividad. */
-function tocarSesion() {
-  if (!estado.sesion) return;
-  estado.sesion.ultimoUso = Date.now();
-  escribirJson(sessionStorage, CLAVE_SESION, estado.sesion);
+  if (typeof sesion.emitida !== 'number') return false;
+  return ahora - sesion.emitida <= SESION_MAX_MS;
 }
 
 function vigilarCaducidad() {
   if (!estado.sesion) return;
   if (sesionVigente(estado.sesion, Date.now())) return;
   cerrarSesion();
-  dom.accesoError.textContent = 'La sesión caducó por inactividad. Volvé a ingresar.';
+  dom.accesoError.textContent = 'La sesión ya lleva 10 horas abierta. Volvé a ingresar.';
   dom.accesoError.hidden = false;
 }
 
@@ -1593,8 +1585,7 @@ async function iniciarSesion(sesion) {
   const ahora = Date.now();
   estado.sesion = {
     usuario: sesion.usuario, rol: sesion.rol, nombre: sesion.nombre,
-    emitida: sesion.emitida || ahora,
-    ultimoUso: ahora
+    emitida: sesion.emitida || ahora
   };
   sesion = estado.sesion;
   escribirJson(sessionStorage, CLAVE_SESION, sesion);
@@ -2629,11 +2620,8 @@ if (sesionVigente(sesionGuardada, Date.now())) {
   dom.usuario.focus();
 }
 
-// Reloj de caducidad y marca de actividad.
+// Reloj de caducidad de la jornada.
 setInterval(vigilarCaducidad, 60 * 1000);
-for (const evento of ['click', 'keydown']) {
-  document.addEventListener(evento, tocarSesion, { passive: true });
-}
 
 /* ============================================================
    AUTOCOMPROBACIÓN
@@ -2707,15 +2695,19 @@ if (location.search.includes('test')) (async () => {
 
   // Caducidad de sesión
   const ahora = 1_700_000_000_000;
-  const viva = { rol: 'admin', emitida: ahora, ultimoUso: ahora };
+  const HORA = 60 * 60 * 1000;
+  const viva = { rol: 'admin', emitida: ahora };
+  iguales(SESION_MAX_MS, 10 * HORA, 'la jornada dura diez horas');
   iguales(sesionVigente(viva, ahora), true, 'sesión recién abierta');
-  iguales(sesionVigente(viva, ahora + SESION_INACTIVIDAD_MS - 1), true, 'antes del límite de inactividad');
-  iguales(sesionVigente(viva, ahora + SESION_INACTIVIDAD_MS + 1), false, 'caduca por inactividad');
-  iguales(sesionVigente({ rol: 'admin', emitida: ahora, ultimoUso: ahora + SESION_MAX_MS },
-                        ahora + SESION_MAX_MS + 1), false, 'caduca por jornada aunque haya actividad');
-  iguales(sesionVigente({ rol: 'admin' }, ahora), false, 'sesión sin marcas de tiempo');
-  iguales(sesionVigente({ rol: 'inventado', emitida: ahora, ultimoUso: ahora }, ahora), false, 'rol desconocido');
+  iguales(sesionVigente(viva, ahora + 9 * HORA), true, 'sigue viva a las nueve horas sin tocar nada');
+  iguales(sesionVigente(viva, ahora + SESION_MAX_MS), true, 'vive hasta el límite exacto');
+  iguales(sesionVigente(viva, ahora + SESION_MAX_MS + 1), false, 'caduca pasadas las diez horas');
+  iguales(sesionVigente({ rol: 'admin' }, ahora), false, 'sesión sin marca de tiempo');
+  iguales(sesionVigente({ rol: 'inventado', emitida: ahora }, ahora), false, 'rol desconocido');
   iguales(sesionVigente(null, ahora), false, 'sin sesión');
+  // Las sesiones guardadas con el formato viejo traen ultimoUso: se ignora sin romper.
+  iguales(sesionVigente({ rol: 'admin', emitida: ahora, ultimoUso: ahora }, ahora + 9 * HORA), true,
+          'una sesión del formato anterior sigue sirviendo');
 
   // Permisos
   const sesionOperador = { usuario: 'ingreso', rol: 'operador', nombre: 'Mesa de entrada' };

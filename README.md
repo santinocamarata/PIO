@@ -25,9 +25,11 @@ esa trazabilidad.
 El nombre de usuario no distingue mayúsculas, minúsculas ni acentos: `kmariño`,
 `KMARIÑO` y `kmarino` son el mismo usuario. La contraseña sí es exacta.
 
-La sesión vive en `sessionStorage` y caduca sola: a las **8 horas** de abierta y
-a los **30 minutos** sin actividad. Cinco intentos fallidos bloquean el ingreso
-por 30 segundos.
+La sesión vive en `sessionStorage` y dura **10 horas** desde que se abre. **No
+caduca por inactividad**: en el mostrador se pasan horas sin tocar la pantalla
+entre alumno y alumno, y pedir la contraseña cada media hora molestaba más de lo
+que protegía. Se cierra al cerrar el navegador y con **Salir**. Cinco intentos
+fallidos bloquean el ingreso por 30 segundos.
 
 ### Cambiar o agregar un usuario
 
@@ -52,7 +54,7 @@ su propio salt: dos personas con la misma contraseña tienen hashes distintos.
 | PBKDF2-HMAC-SHA256, 210.000 iteraciones, salt de 128 bits por usuario | Leer la contraseña abriendo el HTML, y recuperarla con un diccionario |
 | Derivación también para usuarios inexistentes | Que la demora de respuesta delate qué usuarios existen |
 | Mensaje de error único | Que el texto delate si falló el usuario o la contraseña |
-| Caducidad por jornada e inactividad | El equipo de mostrador que queda abierto |
+| Caducidad de la sesión a las 10 horas | La sesión que queda abierta de un día para el otro |
 | Bloqueo tras 5 intentos | Alguien probando contraseñas a mano |
 | CSP, HSTS, `nosniff`, `frame-ancestors 'none'`, `Referrer-Policy`, `Permissions-Policy`, COOP | XSS, clickjacking, downgrade a HTTP, fuga de referer |
 | Versión fija + Subresource Integrity en las tres librerías de CDN | Un CDN comprometido inyectando código con acceso a la base |
