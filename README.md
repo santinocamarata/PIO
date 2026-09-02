@@ -13,17 +13,21 @@ Vercel: <https://pio-t9ma.vercel.app>
 
 ## Acceso
 
-| Usuario | Rol | Qué puede hacer |
-|---|---|---|
-| `ingreso` | Operador | Cargar y consultar fichas |
-| `aromero` | Admin | Todo lo anterior + configuración y borrado de fichas |
-| `scamarata` | Admin | Ídem |
-| `gcanales` | Admin | Ídem |
+Hay **30 usuarios nominales**, uno por persona. No hay cuenta compartida: cada
+ficha queda firmada con el usuario que la emitió, y una cuenta genérica rompía
+esa trazabilidad.
 
-El nombre de usuario no distingue mayúsculas de minúsculas; la contraseña sí,
-exacta. La sesión vive en `sessionStorage` y caduca sola: a las **8 horas** de
-abierta y a los **30 minutos** sin actividad. Cinco intentos fallidos bloquean
-el ingreso por 30 segundos.
+| Rol | Quiénes | Qué puede hacer |
+|---|---|---|
+| Admin | `gcanales`, `tagostinelli`, `scamarata`, `aromero` | Todo lo de operador + configuración y **borrado de fichas** |
+| Operador | Los otros 26 | Cargar, consultar, imprimir y exportar fichas |
+
+El nombre de usuario no distingue mayúsculas, minúsculas ni acentos: `kmariño`,
+`KMARIÑO` y `kmarino` son el mismo usuario. La contraseña sí es exacta.
+
+La sesión vive en `sessionStorage` y caduca sola: a las **8 horas** de abierta y
+a los **30 minutos** sin actividad. Cinco intentos fallidos bloquean el ingreso
+por 30 segundos.
 
 ### Cambiar o agregar un usuario
 

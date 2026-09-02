@@ -926,18 +926,96 @@ select.control { cursor: pointer; }
    contraseña sí, exacta.
    ============================================================ */
 const USUARIOS = [
-  { usuario: 'ingreso',   rol: 'operador', nombre: 'Mesa de entrada',
-    salt: '7c69f2f1399607a21acb923e25897dc8',
-    hash: 'db1978aca666a677c407b93a10a7de6a2fc104bb6b6f28779dbedd200557752d' },
-  { usuario: 'aromero',   rol: 'admin',    nombre: 'Romero',
-    salt: '55ef8e46f49191c4f84a72a14aac23eb',
-    hash: '1fcfd5a36e9e55ce2ffb12dc3cd2cf53897815670ced5eba78a5cf7e64f05a56' },
-  { usuario: 'scamarata', rol: 'admin',    nombre: 'Camarata',
-    salt: 'f3011b476941a3059de6001505dca347',
-    hash: 'c841c954e70eea1307ba93a20059422b5824602753ee4b0bb59fe510a7f5d60e' },
-  { usuario: 'gcanales',  rol: 'admin',    nombre: 'Canales',
-    salt: 'dacfa43b380418c924b620bb35b73c41',
-    hash: 'eaa268ac25687d189812febdc034f4e15b4dbaad7e36c1f0d334f1dfe2e8657f' }
+  { usuario: 'gcanales',     rol: 'admin',    nombre: 'Canales',
+    salt: '04f6442d72aa6c775c56913147d461ff',
+    hash: '954c1d45e5840a5cc3df6776da1befd710e5be9251545a891f23cc0fc8f4e7ed' },
+  { usuario: 'tagostinelli', rol: 'admin',    nombre: 'Agostinelli',
+    salt: 'fbc2466c58c5234568213f6fe1095696',
+    hash: 'ffb5c5ec6c118d118c042261926c580f3102d97f4e9981613cf99ef4163bdbec' },
+  { usuario: 'scamarata',    rol: 'admin',    nombre: 'Camarata',
+    salt: '02824a860327b89bee3c95b4600e9dba',
+    hash: 'f63a694476a4cd8b511d2967e262796e04e98ef04343b17020990db034354667' },
+  { usuario: 'aromero',      rol: 'admin',    nombre: 'Romero',
+    salt: 'f9b798a774da29077c97db702b5d9dd7',
+    hash: '5e7af23d5420ad763ad8455fd9ca9d5eecfc5a0cecab8f69910623069de8fa5c' },
+  { usuario: 'lferro',       rol: 'operador', nombre: 'Ferro',
+    salt: '2f0d8d77d180a560ea22e810a92d2cd9',
+    hash: 'bcaba780ea00dd42ca3d49a40645a0a3a0e5964072eead4c96ac49ecad4c888c' },
+  { usuario: 'fboltes',      rol: 'operador', nombre: 'Boltes',
+    salt: 'd97419cb9848ba6b66ee584b40ca9cba',
+    hash: '1151fe1b8cc9e5ccf1f8bad7a6edb2595fae9887c79fd9779003a0f90297a1fb' },
+  { usuario: 'rseara',       rol: 'operador', nombre: 'Seara',
+    salt: '95a5b37bc2931a249730d937c6c6bb63',
+    hash: 'f20725b086a3031cae6f58fe754ffb89fdda1fe7298bbb4ed72532aaa672b80e' },
+  { usuario: 'gciampi',      rol: 'operador', nombre: 'Ciampi',
+    salt: '39769847e2e2c95b2796f44897e672e3',
+    hash: '7b0ba61e41e80e137d3f77fb186cbbc8ea1e9baadfb0c8a78e5dfdbf82bbb599' },
+  { usuario: 'jcasadey',     rol: 'operador', nombre: 'Casadey',
+    salt: '7c6b07389f6d319a10ba8841c108d3da',
+    hash: '19baff642c34801ce1800991ac3f2d261d4dc6c0e5c7e205682b42c038e56f4d' },
+  { usuario: 'tangio',       rol: 'operador', nombre: 'Angio',
+    salt: 'b8c75f949df018c587b7c8a9960d5884',
+    hash: '5506b16202f389f8ca2006fc6b7cf3fc742cc318de0b9827557a4079b996d1aa' },
+  { usuario: 'vcrespi',      rol: 'operador', nombre: 'Crespi',
+    salt: '467ea3643b5db90a47d2e265b7779f4b',
+    hash: '7919039a1671904ce5aa47232a3e4705d70a2303f72e96b7e5f088a3e8af96ae' },
+  { usuario: 'jaquino',      rol: 'operador', nombre: 'Aquino',
+    salt: '8af774b51e6f3e02e316a64f17c10a1b',
+    hash: '742527f44f7a397be0ee1b3cc614b347b8099365e72a323aff8082f27edcb67d' },
+  { usuario: 'lespinoza',    rol: 'operador', nombre: 'Espinoza',
+    salt: '3599869fc0383e641829761b05318634',
+    hash: 'fc131eaa3f0836d9144cde6fdc3b461542aceffec322b1bd94e2f33f40284103' },
+  { usuario: 'lfernandez',   rol: 'operador', nombre: 'Fernández',
+    salt: '454de401baca53feb3a05d0a8905564c',
+    hash: '0b485c77647742f82e1b2be80e2ad2e4fb2fb95097376609dad01428fcca810f' },
+  { usuario: 'mborrero',     rol: 'operador', nombre: 'Borrero',
+    salt: 'dfc2c7a9bd252b351820f5a8ec7f3071',
+    hash: '429965f54cb0b30fbf1997401ab6c46992765d65b602bf8d98c4d66103996dc5' },
+  { usuario: 'mfranzoi',     rol: 'operador', nombre: 'Franzoi',
+    salt: 'ec4eb56d242a01a328db2a63957c0ae9',
+    hash: 'c4544984a8c96e1bb560c43d2687df4d6419f948428abe9fb0fbd5df60dd95ea' },
+  { usuario: 'fhuaricapcha', rol: 'operador', nombre: 'Huaricapcha',
+    salt: '09e39e368d28e9b8af15048549609e3b',
+    hash: 'a161ae8306393599e702c1591ae3c8923830eacd897f0f03f5dc25ec8817c34f' },
+  { usuario: 'vcalcagno',    rol: 'operador', nombre: 'Calcagno',
+    salt: 'd5a325292c96078e16e284c43e2deaaa',
+    hash: 'aa9946b49fa6906e8b3b8a569aea0c79db2a23de08070775c204da8081209061' },
+  { usuario: 'fmarsicano',   rol: 'operador', nombre: 'Marsicano',
+    salt: '77a2ed2310028895480bd9fbbbc551e0',
+    hash: 'fe589be273403b99fec39455e2ac4c8c26ecb3964aafffa9839ca17537da8de2' },
+  { usuario: 'vdose',        rol: 'operador', nombre: 'Dose',
+    salt: '0a0cb3fafdb35a6b184b7feaaa3a9a48',
+    hash: '54d535a5ace11026814c1dd30fc1cc0304e0bdde9b964a6e0deaa0f75aec1ad4' },
+  { usuario: 'gmolina',      rol: 'operador', nombre: 'Molina',
+    salt: '0d45d3a85461fcf18514812685528973',
+    hash: '65573734f5fb7768609b7ff054e39f2866e060acd2a9fcc295470c935676a2aa' },
+  { usuario: 'jortiz',       rol: 'operador', nombre: 'Ortiz',
+    salt: '028bfcff11d34eeefae653076d2ba219',
+    hash: 'e2dcd2c042d169980ec0e5622141d37bc45d3d2b27d5b710dce8a501d2cdbc18' },
+  { usuario: 'vpekerle',     rol: 'operador', nombre: 'Pekerle',
+    salt: 'c5cb42a968d6dbb94a54ae89b4cbf24b',
+    hash: 'c44562c802da26211519c054d0476d0976f9c6a98ad441cee4069b8b79cb387b' },
+  { usuario: 'eramos',       rol: 'operador', nombre: 'Ramos',
+    salt: '7c18b7640e62b38c8e9a72bf2dd06402',
+    hash: 'f3bc4a7691461eef38ba80c1c91ffe03c8882f2be2e0d40615a8cd4cbb1f1341' },
+  { usuario: 'iripani',      rol: 'operador', nombre: 'Ripani',
+    salt: '1fce2fda7a0951f4c218b1dbfe06a2f0',
+    hash: '2c3e5601662ca5dcb3eec7355350e242d8e5df8e3a05bb81b9f97ccb99164674' },
+  { usuario: 'kmariño',      rol: 'operador', nombre: 'Mariño',
+    salt: '4699b8899ad95795d0aa772a7a1cf1f3',
+    hash: '0092f3aae11ea8bfa81b96f1e2e4d73a996d3c1cea68f333687f2814e96b085b' },
+  { usuario: 'fmartinez',    rol: 'operador', nombre: 'Martínez',
+    salt: 'b6ce70d8f13c2cd72a933a0c236181a0',
+    hash: '0b822825e65b45f4869e8e9c20e793cefb7c806b77bffb08aaef5027f172125a' },
+  { usuario: 'ssceberas',    rol: 'operador', nombre: 'Sceberas',
+    salt: '1129a7e6cbc8debeb248b9529b1765e4',
+    hash: 'fc9d9c52fbf2a19fc11521906d9c18c871c2c3dc9352c323f7c18a5e0beb7fd9' },
+  { usuario: 'asonderegger', rol: 'operador', nombre: 'Sonderegger',
+    salt: 'a6d4bc20f77697c61abaf65be39cb127',
+    hash: '120feab8a06945ec3be9d3a9784b13459ab4229bf0323a55f09e0836dd9c5b6c' },
+  { usuario: 'atarsitano',   rol: 'operador', nombre: 'Tarsitano',
+    salt: 'e72228d8536c640eef48dcd150a2fcbb',
+    hash: '66abea41bd81889d5d845e7abf0749dfe741b98e8e8c4bc2a88c5275cb771550' }
 ];
 
 /* Parámetros de derivación. 210.000 iteraciones es la recomendación de OWASP
@@ -1028,14 +1106,14 @@ function igualesEnTiempoConstante(a, b) {
  * @returns {Promise<{ok:true, sesion:object} | {ok:false, mensaje:string}>}
  */
 async function autenticar(usuarioCrudo, claveCruda, usuarios) {
-  const usuario = String(usuarioCrudo || '').trim().toLowerCase();
+  const usuario = normalizarUsuario(usuarioCrudo);
   const clave = String(claveCruda || '');
 
   if (!usuario || !clave) {
     return { ok: false, mensaje: 'Completá usuario y contraseña.' };
   }
 
-  const encontrado = usuarios.find((u) => u.usuario.toLowerCase() === usuario);
+  const encontrado = usuarios.find((u) => normalizarUsuario(u.usuario) === usuario);
 
   /* Si el usuario no existe se deriva igual contra un salt de descarte. Sin
      eso, un usuario inexistente respondería al instante y uno real tardaría
@@ -1060,6 +1138,25 @@ function puede(sesion, permiso) {
   if (!sesion || !sesion.rol) return false;
   const lista = PERMISOS[sesion.rol];
   return Array.isArray(lista) && lista.includes(permiso);
+}
+
+/** Descompone y quita los signos diacríticos: 'Mariño' -> 'Marino'. */
+function sinAcentos(texto) {
+  return String(texto === null || texto === undefined ? '' : texto)
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '');
+}
+
+/**
+ * Normaliza un nombre de usuario para compararlo.
+ *
+ * Ignora los acentos a propósito: el usuario de Mariño se escribe 'kmariño',
+ * y quien lo tipee 'kmarino' —porque está en un teclado sin eñe, o porque
+ * simplemente no se le ocurrió— tiene que poder entrar igual. La contraseña
+ * no se toca: esto solo decide contra qué usuario se compara.
+ */
+function normalizarUsuario(texto) {
+  return sinAcentos(texto).trim().toLowerCase();
 }
 
 /** Deja solo dígitos: 1251113 | '1251113' | ' 1251113 ' -> '1251113' */
@@ -2051,9 +2148,7 @@ let giampiTemporizador = null;
 
 /** Normaliza para comparar: sin mayúsculas, sin acentos, sin espacios de más. */
 function normalizarConjuro(texto) {
-  return String(texto === null || texto === undefined ? '' : texto)
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .toLowerCase().replace(/\s+/g, ' ').trim();
+  return sinAcentos(texto).toLowerCase().replace(/\s+/g, ' ').trim();
 }
 
 function esConjuro(texto) {
@@ -2573,24 +2668,41 @@ if (location.search.includes('test')) (async () => {
     iguales(u.salt.length, 32, 'el salt de ' + u.usuario + ' mide 128 bits');
   }
   iguales(new Set(USUARIOS.map((u) => u.salt)).size, USUARIOS.length, 'cada usuario tiene su propio salt');
-  // aromero y scamarata comparten contraseña: con salts distintos, los hashes difieren.
+  // Casi todos comparten contraseña: con salts distintos, los hashes difieren.
   iguales(new Set(USUARIOS.map((u) => u.hash)).size, USUARIOS.length, 'contraseñas repetidas no dan hashes repetidos');
+  iguales(new Set(USUARIOS.map((u) => normalizarUsuario(u.usuario))).size, USUARIOS.length, 'no hay usuarios duplicados');
+  iguales(USUARIOS.length, 30, 'están los 30 usuarios');
+  iguales(USUARIOS.filter((u) => u.rol === 'admin').length, 4, 'hay cuatro administradores');
+  iguales(USUARIOS.every((u) => u.rol === 'admin' || u.rol === 'operador'), true, 'todos los roles son válidos');
+  iguales(USUARIOS.some((u) => u.usuario === 'ingreso'), false, 'la cuenta compartida ya no existe');
+
+  // Nombres de usuario
+  iguales(normalizarUsuario('  KMARIÑO  '), 'kmarino', 'normaliza eñe, mayúsculas y espacios');
+  iguales(normalizarUsuario('LFernández'), 'lfernandez', 'normaliza acentos');
+  iguales(sinAcentos('Mariño'), 'Marino', 'quita la eñe conservando las mayúsculas');
 
   // Acceso
-  iguales((await autenticar('ingreso', 'UADE2026', USUARIOS)).ok, true, 'operador ingresa');
-  iguales((await autenticar('ingreso', 'UADE2026', USUARIOS)).sesion.rol, 'operador', 'rol del operador');
-  iguales((await autenticar('INGRESO', 'UADE2026', USUARIOS)).ok, true, 'usuario sin distinguir mayúsculas');
-  iguales((await autenticar('  ingreso  ', 'UADE2026', USUARIOS)).ok, true, 'usuario con espacios');
-  iguales((await autenticar('ingreso', 'uade2026', USUARIOS)).ok, false, 'contraseña distingue mayúsculas');
-  iguales((await autenticar('aromero', 'lordalan', USUARIOS)).sesion.rol, 'admin', 'rol del admin');
+  iguales((await autenticar('lferro', 'UADE2026', USUARIOS)).ok, true, 'un operador ingresa');
+  iguales((await autenticar('lferro', 'UADE2026', USUARIOS)).sesion.rol, 'operador', 'rol de operador');
+  iguales((await autenticar('LFERRO', 'UADE2026', USUARIOS)).ok, true, 'usuario sin distinguir mayúsculas');
+  iguales((await autenticar('  lferro  ', 'UADE2026', USUARIOS)).ok, true, 'usuario con espacios');
+  iguales((await autenticar('lferro', 'uade2026', USUARIOS)).ok, false, 'la contraseña distingue mayúsculas');
+  iguales((await autenticar('aromero', 'lordalan', USUARIOS)).sesion.rol, 'admin', 'rol de admin');
   iguales((await autenticar('AROMERO', 'lordalan', USUARIOS)).ok, true, 'admin sin distinguir mayúsculas');
   iguales((await autenticar('aromero', 'LORDALAN', USUARIOS)).ok, false, 'contraseña del admin exacta');
-  iguales((await autenticar('scamarata', 'lordalan', USUARIOS)).sesion.nombre, 'Camarata', 'scamarata ingresa');
+  iguales((await autenticar('tagostinelli', 'lordalan', USUARIOS)).sesion.rol, 'admin', 'tagostinelli es admin');
   iguales((await autenticar('gcanales', 'UADE2026', USUARIOS)).sesion.rol, 'admin', 'gcanales es admin');
-  iguales((await autenticar('gcanales', 'lordalan', USUARIOS)).ok, false, 'gcanales no entra con otra contraseña');
+  iguales((await autenticar('gciampi', 'UADE2026', USUARIOS)).sesion.rol, 'operador', 'gciampi es operador');
+  iguales((await autenticar('gciampi', 'UADE2026', USUARIOS)).sesion.nombre, 'Ciampi', 'nombre de gciampi');
+  // La eñe: tiene que entrar se escriba como se escriba.
+  iguales((await autenticar('kmariño', 'UADE2026', USUARIOS)).ok, true, 'kmariño ingresa con eñe');
+  iguales((await autenticar('kmarino', 'UADE2026', USUARIOS)).ok, true, 'kmariño ingresa sin eñe');
+  iguales((await autenticar('KMARIÑO', 'UADE2026', USUARIOS)).sesion.nombre, 'Mariño', 'nombre de kmariño');
+  iguales((await autenticar('lferro', 'lordalan', USUARIOS)).ok, false, 'no entra con la contraseña de otro');
+  iguales((await autenticar('ingreso', 'UADE2026', USUARIOS)).ok, false, 'la cuenta compartida ya no entra');
   iguales((await autenticar('otro', 'x', USUARIOS)).ok, false, 'usuario inexistente');
   iguales((await autenticar('', '', USUARIOS)).mensaje, 'Completá usuario y contraseña.', 'campos vacíos');
-  iguales((await autenticar('ingreso', 'mal', USUARIOS)).mensaje,
+  iguales((await autenticar('lferro', 'mal', USUARIOS)).mensaje,
           (await autenticar('nadie', 'mal', USUARIOS)).mensaje, 'el error no revela qué usuarios existen');
 
   // Caducidad de sesión
