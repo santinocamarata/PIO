@@ -1404,6 +1404,7 @@ const dom = {
   giampi: el('giampi'),
   giampiFoto: el('giampi-foto'),
 
+
   fAlumno: el('f-alumno'),
   fLegajo: el('f-legajo'),
   fMotivo: el('f-motivo'),
@@ -2048,10 +2049,14 @@ function esConjuro(texto) {
 }
 
 function invocarGiampi() {
-  if (!dom.giampi.hidden) return;
+  /* Si la foto no cargó —falta el archivo, o todavía viene en camino— no se
+     abre nada. Escuchar el evento 'error' no alcanza: cuando falta el archivo,
+     el 404 se resuelve durante la carga de la página y el evento ya pasó. */
+  if (!dom.giampiFoto.complete || dom.giampiFoto.naturalWidth === 0) return;
+
+  clearTimeout(giampiTemporizador);
   dom.giampi.hidden = false;
   requestAnimationFrame(() => dom.giampi.classList.add('visible'));
-  clearTimeout(giampiTemporizador);
   giampiTemporizador = setTimeout(despedirGiampi, GIAMPI_MS);
 }
 
@@ -2497,8 +2502,6 @@ dom.giampi.addEventListener('click', despedirGiampi);
 document.addEventListener('keydown', (evento) => {
   if (evento.key === 'Escape' && !dom.giampi.hidden) despedirGiampi();
 });
-// Si falta el archivo, la aparición se cancela sola en vez de mostrar un roto.
-dom.giampiFoto.addEventListener('error', despedirGiampi);
 dom.limpiarFiltros.addEventListener('click', () => { limpiarFiltros(); pintarTabla(); });
 
 dom.exportar.addEventListener('click', exportarCsv);
