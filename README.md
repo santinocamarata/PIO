@@ -1,21 +1,23 @@
-# Fichas de excepción — Examen de Ingreso
+# PIO — Fichas de excepción
 
 Aplicación de mesa de entrada para registrar alumnos inscriptos que no podrán
 asistir a la fecha de curso asignada, y emitir la ficha de excepción
 correspondiente.
 
-La pantalla principal es el listado de fichas emitidas. Las fichas se crean
-desde un diálogo que se abre con **Nueva ficha** y se cierra al guardar.
+La aplicación tiene **dos vistas** que se alternan desde la barra superior:
+**Fichas** (el listado, con filtros) y **Nueva ficha** (el formulario de alta).
 
-Esta es la **primera etapa**: todo se guarda en el navegador del equipo. La base
-de datos compartida llega cuando se active Supabase.
+Las fichas, los motivos, las fechas y los PDF adjuntos viven en **Supabase**:
+lo que se carga en un puesto se ve en todos los demás. En producción corre en
+Vercel: <https://pio-t9ma.vercel.app>
 
 ## Acceso
 
 | Usuario | Contraseña | Rol | Qué puede hacer |
 |---|---|---|---|
 | `ingreso` | `UADE2026` | Operador | Cargar y consultar fichas |
-| `Romero` | `lordalan` | Admin | Todo lo anterior + configuración |
+| `aromero` | `lordalan` | Admin | Todo lo anterior + configuración y borrado |
+| `scamarata` | `lordalan` | Admin | Todo lo anterior + configuración y borrado |
 
 El nombre de usuario no distingue mayúsculas de minúsculas; la contraseña sí,
 exacta. La sesión vive en `sessionStorage`: se cierra al cerrar el navegador.
@@ -39,32 +41,44 @@ bloque `<script>` de `index.html`.
 
 ## Cómo se usa
 
-Abrí `index.html` en el navegador. No requiere instalación, servidor ni build.
+En producción, abrí <https://pio-t9ma.vercel.app>. En local, abrí `index.html`
+en el navegador: no requiere instalación, servidor ni build.
 
-### Listado
+### Vista Fichas
 
 Cada fila muestra legajo, alumno, motivo, fecha de recuperatorio, la
 documentación adjunta y el número de ficha.
 
-- El botón con el nombre del PDF **abre el archivo** en una pestaña nueva.
+- El botón con el nombre del PDF **abre el archivo** en una pestaña nueva, con
+  una URL firmada de Supabase que vence a la hora.
 - **Imprimir** vuelve a emitir esa ficha, con firma y sello, en cualquier momento.
-- El buscador filtra por legajo, apellido, motivo o número de ficha.
+- **Eliminar** borra la ficha y su PDF. Solo lo ve el admin; está para limpiar
+  fichas de prueba, no es parte del circuito normal.
 - **Exportar CSV** baja el listado tal como está filtrado, incluyendo qué usuario
   emitió cada ficha.
 
-### Crear una ficha
+### Filtros
 
-1. **Nueva ficha** abre el diálogo.
-2. **Legajo** — escribí los 7 dígitos. Se valida contra el padrón en el momento:
+Cinco criterios que se combinan con Y: **Alumno** y **Legajo** buscan por
+coincidencia parcial; **Motivo** y **Recuperatorio** son exactos; **Estado**
+separa vigentes de vencidas según la fecha de recuperatorio.
+
+Los selectores de motivo y fecha se arman con los valores que realmente
+aparecen en las fichas, así ninguna opción devuelve cero resultados.
+**Limpiar filtros** vuelve al listado completo.
+
+### Vista Nueva ficha
+
+1. **Legajo** — escribí los 7 dígitos. Se valida contra el padrón en el momento:
    la barra de color y el mensaje debajo indican si el legajo existe, está
    incompleto o no figura. Cuando es válido aparece el nombre del alumno.
-3. **Motivo** — seleccionalo de la lista.
-4. **Fecha de recuperatorio** — solo aparecen las vigentes.
-5. **Documentación** — PDF opcional, hasta 10 MB. Se valida formato y tamaño.
-6. **Guardar ficha** — el diálogo se cierra y la ficha aparece en el listado.
+2. **Motivo** — seleccionalo de la lista.
+3. **Fecha de recuperatorio** — solo aparecen las vigentes.
+4. **Documentación** — PDF opcional, hasta 10 MB. Se valida formato y tamaño.
+5. **Guardar ficha** — vuelve al listado con la ficha nueva destacada.
 
 El botón Guardar se habilita solo cuando el legajo es válido y están elegidos el
-motivo y la fecha. Se puede cancelar con **Cancelar**, la **×** o la tecla Esc.
+motivo y la fecha. **Cancelar** vuelve al listado sin guardar.
 
 ## Configuración (solo admin)
 
@@ -99,16 +113,37 @@ python build_padron.py "Alumnos_a_ingresar_1757390.xlsx"
 
 | Qué | Dónde | Por qué |
 |---|---|---|
+| Listado de fichas | Supabase · tabla `fichas` | Compartido entre todos los puestos |
+| Motivos | Supabase · tabla `motivos` | El admin lo configura una vez para todos |
+| Fechas de recuperatorio | Supabase · tabla `fechas_recuperatorio` | Ídem |
+| PDF adjuntos | Supabase Storage · bucket `adjuntos` | Privado; se sirve con URL firmada |
+| Padrón de alumnos | `padron.js` + `localStorage` | Solo lectura, no necesita compartirse |
 | Sesión abierta | `sessionStorage` | Se cierra con el navegador |
-| Padrón de alumnos | `localStorage` | Texto liviano, ~70 KB |
-| Listado de fichas | `localStorage` | Texto liviano |
-| Motivos y fechas | `localStorage` | Texto liviano |
-| PDF adjuntos | `IndexedDB` | Un solo PDF de 10 MB ya excede la cuota de localStorage |
 
-Todo vive en el navegador del equipo. **Lo que se carga en una computadora no se
-ve en otra**, y eso vale también para la configuración: si el admin agrega un
-motivo en un puesto, hay que repetirlo en los demás. Si se borran los datos del
-navegador se pierde el listado. Usá **Exportar CSV** para respaldar.
+Las fichas y la configuración son **compartidas**: lo que carga un operador en
+un puesto lo ve otro operador en otro equipo. El padrón, en cambio, es local a
+cada navegador: si el admin lo actualiza en un puesto, hay que repetirlo en los
+demás o regenerar `padron.js`.
+
+### Puesta en marcha de la base
+
+`supabase_setup.sql` crea las tres tablas, el bucket y las políticas de RLS.
+Se corre **una sola vez** en el SQL Editor del proyecto. Además hay que dar los
+permisos de tabla al rol anónimo, que las políticas de RLS por sí solas no
+otorgan:
+
+```sql
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.motivos              TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.fechas_recuperatorio TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.fichas               TO anon;
+```
+
+Sin ese `GRANT`, cada consulta vuelve con `401 permission denied for table`
+aunque la política exista y la clave sea correcta.
+
+La clave que va en `index.html` es la **`anon` en formato JWT** (empieza con
+`eyJ`), no la publishable `sb_publishable_…`: el SDK no reconoce ese formato y
+todas las llamadas fallan con 401. La `service_role` **nunca** va en el HTML.
 
 ## Archivos
 
@@ -117,15 +152,17 @@ navegador se pierde el listado. Usá **Exportar CSV** para respaldar.
 | `index.html` | La aplicación completa: acceso, listado, carga, configuración y ficha imprimible |
 | `padron.js` | Padrón embebido, generado. No editar a mano |
 | `build_padron.py` | Regenera `padron.js` desde un Excel |
+| `supabase_setup.sql` | Migración inicial de la base. Correr una sola vez |
+| `vercel.json` | Le dice a Vercel que es un sitio estático sin build |
 
 ## Verificación
 
-Abrí `index.html?test` y mirá la consola del navegador. Corre 64 comprobaciones
-sobre autenticación y permisos, la configuración de motivos y fechas, la
-normalización de legajos y nombres, la resolución contra el padrón, la validación
-del adjunto, el parseo y la generación de CSV, el filtrado del listado y el
-formato de fechas y números de ficha. Si algo falla, se lanza una excepción con
-el caso concreto.
+Abrí `index.html?test` (o <https://pio-t9ma.vercel.app/?test>) y mirá la consola
+del navegador. Corre las comprobaciones sobre autenticación y permisos, la
+configuración de motivos y fechas, la normalización de legajos y nombres, la
+resolución contra el padrón, la validación del adjunto, el parseo y la generación
+de CSV, el filtrado combinado del listado y el formato de fechas y números de
+ficha. Si algo falla, se lanza una excepción con el caso concreto.
 
 ## Decisiones que conviene conocer
 
@@ -160,16 +197,28 @@ cierre con Esc. No hay JavaScript propio de accesibilidad que pueda quedar
 desincronizado.
 
 **El número de ficha es determinístico**, con formato
-`EX-AAAAMMDD-LEGAJO-HHMM`. No es una secuencia global: sin base de datos no hay
-forma de garantizar unicidad entre puestos.
+`EX-AAAAMMDD-LEGAJO-HHMM`. La columna `folio` tiene un índice único en Postgres,
+así que dos puestos no pueden emitir el mismo número; pero sigue sin ser una
+secuencia correlativa.
+
+**El error es anaranjado, no rojo.** Con la marca en borgoña, un rojo puro se
+lee como color institucional y deja de alertar. El error va a `oklch(0.520 0.155 44)`,
+lo bastante lejos en tono como para distinguirse de un botón primario.
+
+**El filtro por Estado arranca en "Todas".** Un filtro que oculta datos por
+defecto es una trampa: si el operador carga una ficha con fecha pasada y el
+listado arranca en "Vigentes", la ficha desaparece y parece que no se guardó.
+
+**Guardar una ficha limpia los filtros.** Por la misma razón: la ficha recién
+creada tiene que verse sí o sí al volver al listado.
 
 ## Qué falta para la versión completa
 
 - Autenticación real con Supabase Auth y permisos reforzados con RLS en Postgres
-- Base de datos compartida entre equipos, con las fichas y la configuración de todos
-- Subir el PDF a Supabase Storage con URLs firmadas, en vez del navegador
+  (hoy las políticas son permisivas para el rol anónimo)
 - Alta y baja de usuarios desde el panel, en vez de editar el arreglo `USUARIOS`
 - Numeración correlativa de fichas
+- Padrón compartido en Supabase, en vez de local a cada navegador
 
 Las funciones de validación y armado (`autenticar`, `puede`, `normalizarLegajo`,
 `resolverLegajo`, `validarAdjunto`, `construirPadron`, `motivosActivos`,
