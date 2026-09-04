@@ -195,7 +195,9 @@ marcadas y no se ofrecen, aunque estén activas. El listado se ordena
 cronológicamente.
 
 **Padrón de alumnos.** Cargar el Excel que exporta el sistema académico, con
-columnas `legajo` y `alumno`. Acepta `.xlsx`, `.xls` y `.csv`.
+columnas `legajo` y `alumno`. Acepta `.xlsx`, `.xls` y `.csv`. **Reemplaza el
+padrón completo** en la base compartida: un legajo que estaba y no viene en el
+archivo nuevo deja de validar en las fichas nuevas.
 
 > **Desactivar es más seguro que eliminar.** Las fichas guardan el texto del
 > motivo y la fecha, no una referencia, así que eliminar no rompe el historial —
@@ -204,7 +206,11 @@ columnas `legajo` y `alumno`. Acepta `.xlsx`, `.xls` y `.csv`.
 La lectura de Excel usa una librería que se descarga de internet la primera vez;
 sin conexión, guardá el archivo como CSV desde Excel y cargá ese.
 
-Para regenerar el padrón que viene embebido por defecto:
+`padron.js` es la semilla con la que se llena la tabla `padron` la primera vez
+que la aplicación corre contra un proyecto de Supabase vacío. No hace falta
+regenerarlo para actualizar el padrón del día a día —eso se hace desde acá,
+Configuración— pero conviene mantenerlo razonablemente al día para que un
+proyecto de Supabase nuevo no arranque con un padrón viejo:
 
 ```bash
 pip install openpyxl
@@ -218,30 +224,42 @@ python build_padron.py "Alumnos_a_ingresar_1757390.xlsx"
 | Listado de fichas | Supabase · tabla `fichas` | Compartido entre todos los puestos |
 | Motivos | Supabase · tabla `motivos` | El admin lo configura una vez para todos |
 | Fechas de recuperatorio | Supabase · tabla `fechas_recuperatorio` | Ídem |
+| Padrón de alumnos | Supabase · tabla `padron` | El admin lo actualiza una vez para todos |
 | PDF adjuntos | Supabase Storage · bucket `adjuntos` | Privado; se sirve con URL firmada |
-| Padrón de alumnos | `padron.js` + `localStorage` | Solo lectura, no necesita compartirse |
 | Sesión abierta | `sessionStorage` | Se cierra con el navegador |
 
-Las fichas y la configuración son **compartidas**: lo que carga un operador en
-un puesto lo ve otro operador en otro equipo. El padrón, en cambio, es local a
-cada navegador: si el admin lo actualiza en un puesto, hay que repetirlo en los
-demás o regenerar `padron.js`.
+Fichas, configuración y padrón son **compartidos**: lo que carga o actualiza un
+operador en un puesto lo ve el resto al instante, sin repetirlo equipo por
+equipo. `padron.js` sigue en el repo, pero ya no es la fuente que usa la
+aplicación en producción: es solo la **semilla** con la que se llena la tabla
+`padron` la primera vez que corre contra un proyecto de Supabase nuevo, igual
+que `SEMILLA` siembra `motivos` y `fechas_recuperatorio`. Después de esa
+siembra inicial, actualizar el padrón es siempre desde **Configuración → Padrón
+de alumnos** en la aplicación: reemplaza la tabla completa, no la va sumando.
 
 ### Puesta en marcha de la base
 
-`supabase_setup.sql` crea las tres tablas, el bucket y las políticas de RLS.
-Se corre **una sola vez** en el SQL Editor del proyecto. Además hay que dar los
-permisos de tabla al rol anónimo, que las políticas de RLS por sí solas no
-otorgan:
+`supabase_setup.sql` crea las cinco tablas (`motivos`, `fechas_recuperatorio`,
+`fichas`, `padron`, `padron_meta`), el bucket y las políticas de RLS. Se corre
+**una sola vez** en el SQL Editor del proyecto. Además hay que dar los permisos
+de tabla al rol anónimo, que las políticas de RLS por sí solas no otorgan:
 
 ```sql
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.motivos              TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.fechas_recuperatorio TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.fichas               TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.padron               TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.padron_meta          TO anon;
 ```
 
 Sin ese `GRANT`, cada consulta vuelve con `401 permission denied for table`
 aunque la política exista y la clave sea correcta.
+
+**Si el proyecto ya tenía las primeras tres tablas** (era el caso hasta que se
+sumó el padrón), correr `supabase_setup.sql` entero falla: `CREATE POLICY`
+no es idempotente y tira "ya existe" para las políticas viejas. Vale correr
+solo la parte de `padron`/`padron_meta` del archivo contra un proyecto
+existente.
 
 La clave que va en `index.html` es la **`anon` en formato JWT** (empieza con
 `eyJ`), no la publishable `sb_publishable_…`: el SDK no reconoce ese formato y
@@ -323,9 +341,9 @@ creada tiene que verse sí o sí al volver al listado.
 - Mover el JavaScript a un archivo aparte para sacar `'unsafe-inline'` de la CSP
 - Alta y baja de usuarios desde el panel, en vez de editar el arreglo `USUARIOS`
 - Numeración correlativa de fichas
-- Padrón compartido en Supabase, en vez de local a cada navegador
 
 Las funciones de validación y armado (`autenticar`, `puede`, `normalizarLegajo`,
-`resolverLegajo`, `validarAdjunto`, `construirPadron`, `motivosActivos`,
-`fechasVigentes`, `filtrarFichas`, `armarCsv`) son puras y no tocan el DOM, así
-que pasan tal cual al proyecto Next.js cuando llegue ese momento.
+`resolverLegajo`, `validarAdjunto`, `construirPadron`, `legajosABorrar`,
+`motivosActivos`, `fechasVigentes`, `filtrarFichas`, `armarCsv`) son puras y no
+tocan el DOM, así que pasan tal cual al proyecto Next.js cuando llegue ese
+momento.

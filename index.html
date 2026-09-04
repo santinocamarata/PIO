@@ -1293,6 +1293,16 @@ function construirPadron(filas) {
   return { padron, descartadas, cantidad: Object.keys(padron).length };
 }
 
+/**
+ * Legajos que estaban en el padrón anterior y no están en el nuevo: son las
+ * bajas al reemplazar el padrón completo. Se calcula contra `estado.padron`
+ * en memoria —ya reflejaba Supabase al momento del login— para no gastar una
+ * consulta extra antes de guardar.
+ */
+function legajosABorrar(legajosViejos, padronNuevo) {
+  return legajosViejos.filter((legajo) => !padronNuevo[legajo]);
+}
+
 /** Parser CSV con soporte de comillas y separador , o ; */
 function parsearCsv(texto) {
   const limpio = texto.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
@@ -1432,8 +1442,8 @@ function hayFiltros(filtros) {
 
 /* ============================================================
    SUPABASE
-   Fichas y configuración en la base compartida.
-   Padrón y sesión siguen en el navegador.
+   Fichas, configuración y padrón en la base compartida.
+   Solo la sesión sigue en el navegador.
    ============================================================ */
 const SUPA_URL  = 'https://ffqpgtordxgtedxixpwi.supabase.co';
 const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmcXBndG9yZHhndGVkeGl4cHdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyOTc5NTEsImV4cCI6MjEwMzg3Mzk1MX0.yixtOrQizFtr2Bd4gp6Xjl637WQInZpoMZlICYBA9o8';
@@ -1441,7 +1451,6 @@ const supa = window.supabase.createClient(SUPA_URL, SUPA_ANON);
 const BUCKET_PDF = 'adjuntos';
 
 const CLAVE_SESION = 'pio.sesion.v1';
-const CLAVE_PADRON = 'pio.padron.v1';
 
 function leerJson(almacen, clave, respaldo) {
   try {
@@ -1470,8 +1479,8 @@ const fichaDeDB  = (r) => ({
    ============================================================ */
 const estado = {
   sesion: null,
-  padron: window.PADRON || {},
-  padronMeta: window.PADRON_META || { origen: '—', cantidad: 0, generado: '—' },
+  padron: {},
+  padronMeta: { origen: '—', cantidad: 0, generado: '—' },
   config: { motivos: [], fechas: [] },
   fichas: [],
   alumno: null,
@@ -1604,9 +1613,10 @@ async function iniciarSesion(sesion) {
   dom.tabla.hidden = true;
   dom.vacio.hidden = true;
 
-  await Promise.all([cargarConfig(), cargarFichas()]);
+  await Promise.all([cargarConfig(), cargarFichas(), cargarPadron()]);
   poblarSelects();
   refrescarListado();
+  refrescarPadron();
 }
 
 function cerrarSesion() {
@@ -1684,6 +1694,47 @@ async function cargarFichas() {
   const { data, error } = await supa.from('fichas').select('*').order('creada_at', { ascending: false });
   if (error) { console.error('Error cargando fichas:', error); return; }
   estado.fichas = (data || []).map(fichaDeDB);
+}
+
+/**
+ * Carga el padrón desde Supabase. Si la tabla está vacía —primera vez que
+ * corre este proyecto contra esta base— la siembra con el padrón embebido
+ * en `padron.js` antes de leerla, igual que `cargarConfig` siembra motivos
+ * y fechas desde `SEMILLA`.
+ */
+async function cargarPadron() {
+  const { data, error } = await supa.from('padron').select('legajo, alumno');
+  if (error) { console.error('Error cargando padrón:', error); return; }
+
+  let filas = data || [];
+  if (filas.length === 0 && Object.keys(window.PADRON || {}).length > 0) {
+    await sembrarPadron();
+    const { data: d2 } = await supa.from('padron').select('legajo, alumno');
+    filas = d2 || [];
+  }
+
+  const mapa = {};
+  for (const fila of filas) mapa[fila.legajo] = fila.alumno;
+  estado.padron = mapa;
+
+  const { data: meta } = await supa.from('padron_meta').select('*').eq('id', 1).maybeSingle();
+  estado.padronMeta = {
+    cantidad: filas.length,
+    origen: meta?.origen || (window.PADRON_META && window.PADRON_META.origen) || '—',
+    generado: meta?.actualizado_at ? isoLocal(new Date(meta.actualizado_at)) : '—'
+  };
+}
+
+async function sembrarPadron() {
+  const filas = Object.entries(window.PADRON || {}).map(([legajo, alumno]) => ({ legajo, alumno }));
+  if (filas.length === 0) return;
+  await supa.from('padron').insert(filas);
+  await supa.from('padron_meta').upsert({
+    id: 1,
+    origen: (window.PADRON_META && window.PADRON_META.origen) || 'padrón embebido',
+    actualizado_por: 'sistema',
+    actualizado_at: new Date().toISOString()
+  });
 }
 
 function poblarSelects() {
@@ -2384,14 +2435,6 @@ function refrescarPadron() {
   dom.pGenerado.textContent = meta.generado;
 }
 
-function recuperarPadronGuardado() {
-  const guardado = leerJson(localStorage, CLAVE_PADRON, null);
-  if (guardado && guardado.padron && guardado.meta) {
-    estado.padron = guardado.padron;
-    estado.padronMeta = guardado.meta;
-  }
-}
-
 /** Ubica las columnas legajo/alumno por encabezado; si no hay, usa 0 y 1. */
 function filasDeDatos(filas) {
   if (filas.length === 0) return [];
@@ -2436,6 +2479,37 @@ async function leerFilasDelArchivo(archivo) {
   return XLSX.utils.sheet_to_json(hoja, { header: 1, raw: true, defval: '' });
 }
 
+/**
+ * Reemplaza el padrón completo en Supabase por `padronNuevo`.
+ *
+ * El orden importa: primero se sube todo lo nuevo (upsert), recién al final
+ * se borran las bajas. Si la subida falla a mitad de camino, los legajos que
+ * todavía no se tocaron siguen validando con el valor anterior en vez de
+ * desaparecer — nunca hay una ventana en la que el padrón quede vacío.
+ */
+async function reemplazarPadronEnSupabase(padronNuevo, nombreArchivo) {
+  const filas = Object.entries(padronNuevo).map(([legajo, alumno]) => ({ legajo, alumno }));
+  const { error: upError } = await supa.from('padron').upsert(filas, { onConflict: 'legajo' });
+  if (upError) return { ok: false };
+
+  const bajas = legajosABorrar(Object.keys(estado.padron), padronNuevo);
+  if (bajas.length > 0) {
+    // No corta el flujo si falla: el padrón nuevo ya está activo, los
+    // legajos dados de baja quedan un poco más y se limpian en el próximo
+    // reemplazo. Peor eso que dejar el padrón nuevo a mitad de subir.
+    await supa.from('padron').delete().in('legajo', bajas);
+  }
+
+  await supa.from('padron_meta').upsert({
+    id: 1,
+    origen: nombreArchivo,
+    actualizado_por: estado.sesion ? estado.sesion.usuario : '—',
+    actualizado_at: new Date().toISOString()
+  });
+
+  return { ok: true, bajas: bajas.length };
+}
+
 async function actualizarPadron(archivo) {
   if (!exigir('configurar')) return;
   avisar(dom.notaPadron, 'Leyendo ' + archivo.name + '…', null);
@@ -2446,19 +2520,24 @@ async function actualizarPadron(archivo) {
       return;
     }
 
+    avisar(dom.notaPadron, 'Guardando ' + resultado.cantidad.toLocaleString('es-AR') + ' legajos en la base compartida…', null);
+    const guardado = await reemplazarPadronEnSupabase(resultado.padron, archivo.name);
+    if (!guardado.ok) {
+      avisar(dom.notaPadron, 'No se pudo guardar el padrón. Intentá de nuevo.', 'error');
+      return;
+    }
+
     estado.padron = resultado.padron;
     estado.padronMeta = {
       origen: archivo.name,
       cantidad: resultado.cantidad,
       generado: isoLocal(new Date())
     };
-
-    const persistido = escribirJson(localStorage, CLAVE_PADRON, { padron: estado.padron, meta: estado.padronMeta });
     refrescarPadron();
 
-    let texto = resultado.cantidad.toLocaleString('es-AR') + ' legajos cargados';
+    let texto = resultado.cantidad.toLocaleString('es-AR') + ' legajos guardados en la base compartida';
     if (resultado.descartadas > 0) texto += ' · ' + resultado.descartadas + ' filas descartadas';
-    if (!persistido) texto += ' · no se pudo guardar en este navegador';
+    if (guardado.bajas > 0) texto += ' · ' + guardado.bajas + ' legajos dados de baja';
     avisar(dom.notaPadron, texto, 'ok');
   } catch (error) {
     avisar(dom.notaPadron, error && error.message === 'sin red'
@@ -2609,8 +2688,6 @@ dom.exportarZip.addEventListener('click', exportarCarpetas);
    INICIO
    ============================================================ */
 dom.adjuntoMax.textContent = String(SEMILLA.adjuntoMaxMB);
-recuperarPadronGuardado();
-refrescarPadron();
 
 const sesionGuardada = leerJson(sessionStorage, CLAVE_SESION, null);
 if (sesionVigente(sesionGuardada, Date.now())) {
@@ -2772,6 +2849,13 @@ if (location.search.includes('test')) (async () => {
   const construido = construirPadron([[1251113, 'Lovera Roja, Daniel'], ['', 'Sin legajo'], ['123', 'Corto']]);
   iguales(construido.cantidad, 1, 'padrón construido');
   iguales(construido.descartadas, 2, 'filas descartadas');
+
+  // Reemplazo de padrón: qué legajos se dan de baja
+  const padronNuevo = { '1111111': 'Uno', '2222222': 'Dos' };
+  iguales(legajosABorrar(['1111111', '2222222', '3333333'], padronNuevo).join(','), '3333333', 'da de baja el legajo que ya no está');
+  iguales(legajosABorrar(['1111111', '2222222'], padronNuevo).length, 0, 'sin bajas cuando el padrón nuevo cubre todo lo anterior');
+  iguales(legajosABorrar([], padronNuevo).length, 0, 'sin padrón anterior no hay nada que borrar');
+  iguales(legajosABorrar(['9999999'], {}).join(','), '9999999', 'padrón nuevo vacío da de baja todo lo anterior');
 
   const csv = parsearCsv('legajo,alumno\n1251113,"Lovera Roja, Daniel"\n');
   iguales(csv.length, 2, 'filas CSV');
