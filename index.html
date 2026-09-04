@@ -1697,19 +1697,39 @@ async function cargarFichas() {
 }
 
 /**
+ * Trae todas las filas de una tabla, paginando. PostgREST limita cada
+ * respuesta a 1000 filas por defecto (configuración `db-max-rows` del
+ * proyecto) — el padrón tiene miles de legajos, así que un `select()` sin
+ * paginar deja afuera en silencio todo lo que pasa de la primera página.
+ */
+async function traerTodasLasFilas(tabla, columnas) {
+  const TAMANO_PAGINA = 1000;
+  let desde = 0;
+  let todas = [];
+  while (true) {
+    const { data, error } = await supa.from(tabla).select(columnas).range(desde, desde + TAMANO_PAGINA - 1);
+    if (error) return { data: null, error };
+    todas = todas.concat(data || []);
+    if (!data || data.length < TAMANO_PAGINA) break;
+    desde += TAMANO_PAGINA;
+  }
+  return { data: todas, error: null };
+}
+
+/**
  * Carga el padrón desde Supabase. Si la tabla está vacía —primera vez que
  * corre este proyecto contra esta base— la siembra con el padrón embebido
  * en `padron.js` antes de leerla, igual que `cargarConfig` siembra motivos
  * y fechas desde `SEMILLA`.
  */
 async function cargarPadron() {
-  const { data, error } = await supa.from('padron').select('legajo, alumno');
+  const { data, error } = await traerTodasLasFilas('padron', 'legajo, alumno');
   if (error) { console.error('Error cargando padrón:', error); return; }
 
   let filas = data || [];
   if (filas.length === 0 && Object.keys(window.PADRON || {}).length > 0) {
     await sembrarPadron();
-    const { data: d2 } = await supa.from('padron').select('legajo, alumno');
+    const { data: d2 } = await traerTodasLasFilas('padron', 'legajo, alumno');
     filas = d2 || [];
   }
 
